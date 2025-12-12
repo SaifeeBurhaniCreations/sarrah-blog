@@ -65,8 +65,10 @@ export const Navbar: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center space-x-6 text-luxe-black">
-          {!isAuthenticated && location.pathname !== '/login' && (
-             <Link to="/login" className="hover:text-luxe-gold transition-colors hidden md:block">
+          {!isAuthenticated && (
+             <Link to="/" className="hover:text-luxe-gold transition-colors hidden md:block">
+                {/* {!isAuthenticated && location.pathname !== '/login' && (
+             <Link to="/login" className="hover:text-luxe-gold transition-colors hidden md:block"> */}
                 <User size={22} strokeWidth={1.5} />
              </Link>
           )}
