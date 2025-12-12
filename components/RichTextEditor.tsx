@@ -84,91 +84,171 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   // --- Image & Gallery Handling ---
 
   const triggerImageUpload = (type: 'image' | 'gallery' | 'polaroid' | 'image-carousel') => {
+      const willBeMultiple = type === 'gallery' || type === 'image-carousel' || type === 'polaroid';
+
       setInsertType(type);
-      if (fileInputRef.current) {
-          // Reset value to allow re-selecting same file
-          fileInputRef.current.value = '';
-          fileInputRef.current.click();
-      }
+if (fileInputRef.current) {
+    fileInputRef.current.multiple = willBeMultiple;
+    fileInputRef.current.value = ''; 
+    fileInputRef.current.click();
+    return;
+  }
+
+  setTimeout(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.multiple = willBeMultiple;
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  }, 0);
   };
+const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fileList = e.target.files;
+  if (!fileList || fileList.length === 0) return;
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
+  const filesArray = Array.from(fileList) as File[];
 
-      contentRef.current?.focus(); // Focus editor to ensure insertion point
+  contentRef.current?.focus();
 
-      try {
-        const uploads = await Promise.all(
-            Array.from(files).map(file => FileUploadService.uploadImage(file))
-        );
+  try {
+    const uploadsRaw = await Promise.all(
+      filesArray.map((file: File) => FileUploadService.uploadImage(file))
+    );
 
-        let htmlToInsert = '';
+    // Normalize uploads to string[] (handle cases where upload returns { url } or string)
+    const uploads: string[] = uploadsRaw.map((u) =>
+      typeof u === 'string' ? u : (u && (u as any).url) ? (u as any).url : String(u)
+    );
 
-        if (insertType === 'image') {
-            // Large Hero - wrapped in p tag break to ensure isolation
-            htmlToInsert = `
-            <p><br/></p>
-            <div class="my-8 group relative w-full block clear-both" contenteditable="false">
-                <img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg block" alt="Editorial Image" />
-                <p class="text-center text-xs text-gray-400 mt-2 italic">Figure: Full Width Display</p>
-            </div>
-            <p><br/></p>`;
-        } 
-        else if (insertType === 'polaroid') {
-            // Polaroid
-            htmlToInsert = `
-            <div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0 z-10 relative" contenteditable="false">
-                <img src="${uploads[0]}" class="w-full h-auto mb-3" />
-                <p class="font-serif italic text-center text-sm text-gray-500">Featured Look</p>
-            </div>`;
+    // debug quickly if needed
+    // console.log('uploads:', uploads);
+
+    let htmlToInsert = '';
+
+    if (insertType === 'image') {
+      htmlToInsert = `
+        <p><br/></p>
+        <div class="my-8 group relative w-full block clear-both" contenteditable="false">
+          <img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg block" alt="Editorial Image" />
+          <p class="text-center text-xs text-gray-400 mt-2 italic">Figure: Full Width Display</p>
+        </div>
+        <p><br/></p>`;
+    } else if (insertType === 'polaroid') {
+      htmlToInsert = `
+        <div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0 z-10 relative" contenteditable="false">
+          <img src="${uploads[0]}" class="w-full h-auto mb-3" />
+          <p class="font-serif italic text-center text-sm text-gray-500">Featured Look</p>
+        </div>`;
+    } else if (insertType === 'gallery') {
+      // Build elements using DOM - more robust than insertHTML for multiple images
+      const wrapperTop = document.createElement('p');
+      wrapperTop.appendChild(document.createElement('br'));
+
+      const galleryContainer = document.createElement('div');
+      galleryContainer.className = 'my-10 w-full block clear-both';
+      galleryContainer.setAttribute('contenteditable', 'false');
+
+      const grid = document.createElement('div');
+      grid.className = 'grid grid-cols-2 md:grid-cols-3 gap-4';
+
+      uploads.forEach((url) => {
+        const cell = document.createElement('div');
+        cell.className = 'aspect-[3/4] overflow-hidden rounded-md cursor-pointer group relative';
+
+        const img = document.createElement('img');
+        img.src = String(url);
+        img.className = 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-110';
+        img.alt = 'Gallery image';
+
+        // optional onload for debugging or placeholder removal
+        img.onload = () => {
+          // console.log('gallery image loaded', url);
+        };
+
+        cell.appendChild(img);
+        grid.appendChild(cell);
+      });
+
+      const note = document.createElement('p');
+      note.className = 'text-center text-xs text-gray-400 mt-2 italic';
+      note.textContent = `Gallery: ${uploads.length} Images`;
+
+      const wrapperBottom = document.createElement('p');
+      wrapperBottom.appendChild(document.createElement('br'));
+
+      galleryContainer.appendChild(grid);
+      galleryContainer.appendChild(note);
+
+      // Insert into editor at caret or end
+      const range = (() => {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || !contentRef.current) {
+          const r = document.createRange();
+          r.selectNodeContents(contentRef.current!);
+          r.collapse(false);
+          return r;
         }
-        else if (insertType === 'gallery') {
-            // Grid Gallery
-            const imagesHtml = uploads.map(url => 
-                `<div class="aspect-[3/4] overflow-hidden rounded-md cursor-pointer group relative">
-                    <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                </div>`
-            ).join('');
-            htmlToInsert = `
-            <p><br/></p>
-            <div class="my-10 w-full block clear-both" contenteditable="false">
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">${imagesHtml}</div>
-                <p class="text-center text-xs text-gray-400 mt-2 italic">Gallery: ${uploads.length} Images</p>
-            </div>
-            <p><br/></p>`;
-        }
-        else if (insertType === 'image-carousel') {
-             // Horizontal Scroll Image Strip
-             const imagesHtml = uploads.map(url => 
-                `<div class="min-w-[300px] h-[400px] snap-center rounded-lg overflow-hidden flex-shrink-0">
-                    <img src="${url}" class="w-full h-full object-cover" />
-                 </div>`
-             ).join('');
-             htmlToInsert = `
-             <p><br/></p>
-             <div class="my-12 relative group w-full block clear-both" contenteditable="false">
-                 <div class="absolute -left-4 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-                 <div class="absolute -right-4 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-                 <div class="flex overflow-x-auto gap-4 py-4 px-1 snap-x snap-mandatory no-scrollbar">
-                    ${imagesHtml}
-                 </div>
-                 <p class="text-center text-xs text-gray-400 mt-1 uppercase tracking-widest">Swipe to View</p>
-             </div>
-             <p><br/></p>`;
-        }
+        return sel.getRangeAt(0).cloneRange();
+      })();
 
-        document.execCommand('insertHTML', false, htmlToInsert);
-        handleInput();
+      const frag = document.createDocumentFragment();
+      frag.appendChild(wrapperTop);
+      frag.appendChild(galleryContainer);
+      frag.appendChild(wrapperBottom);
 
-      } catch (error) {
-          console.error("Editor upload failed", error);
-          alert("Failed to upload image(s).");
-      } finally {
-          setInsertType(null);
-          if (fileInputRef.current) fileInputRef.current.value = '';
+      range.deleteContents();
+      range.insertNode(frag);
+
+      // Move caret after inserted gallery
+      const sel = window.getSelection();
+      if (sel) {
+        sel.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.setStartAfter(galleryContainer);
+        newRange.collapse(true);
+        sel.addRange(newRange);
       }
-  };
+
+      // notify editor change
+      handleInput();
+
+      // nothing more to insert as HTML string
+      htmlToInsert = '';
+    } else if (insertType === 'image-carousel') {
+      const imagesHtml = uploads
+        .map(
+          (url) =>
+            `<div class="min-w-[300px] h-[400px] snap-center rounded-lg overflow-hidden flex-shrink-0">
+               <img src="${url}" class="w-full h-full object-cover" />
+             </div>`
+        )
+        .join('');
+      htmlToInsert = `
+        <p><br/></p>
+        <div class="my-12 relative group w-full block clear-both" contenteditable="false">
+          <div class="absolute -left-4 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+          <div class="absolute -right-4 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+          <div class="flex overflow-x-auto gap-4 py-4 px-1 snap-x snap-mandatory no-scrollbar">
+            ${imagesHtml}
+          </div>
+          <p class="text-center text-xs text-gray-400 mt-1 uppercase tracking-widest">Swipe to View</p>
+        </div>
+        <p><br/></p>`;
+    }
+
+    // If we have HTML to insert (image, polaroid, carousel), insert it
+    if (htmlToInsert) {
+      document.execCommand('insertHTML', false, htmlToInsert);
+      handleInput();
+    }
+  } catch (error) {
+    console.error('Editor upload failed', error);
+    alert('Failed to upload image(s).');
+  } finally {
+    setInsertType(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+};
 
   // --- Product Carousel Logic ---
 
@@ -276,6 +356,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     </button>
   );
 
+  const isMultiple = insertType === 'gallery' || insertType === 'image-carousel' || insertType === 'polaroid';
+
   return (
     <div className="border border-gray-200 rounded-lg bg-white focus-within:border-luxe-gold focus-within:ring-1 focus-within:ring-luxe-gold transition-all shadow-sm relative z-0">
       
@@ -308,11 +390,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
         {/* Hidden File Input for basic images */}
         <input 
+            key={String(isMultiple)} 
             type="file" 
             ref={fileInputRef} 
             className="hidden" 
             accept="image/*" 
-            multiple={insertType === 'gallery' || insertType === 'image-carousel'}
+            multiple={isMultiple}
             onChange={handleFileUpload}
         />
       </div>
