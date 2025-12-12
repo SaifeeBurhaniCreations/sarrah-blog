@@ -1,5 +1,6 @@
 import React from 'react';
 import { Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
   return (
@@ -22,20 +23,20 @@ export const Footer: React.FC = () => {
         <div>
            <h4 className="text-luxe-gold text-xs font-bold uppercase tracking-widest mb-6">Explore</h4>
            <ul className="space-y-4 text-sm text-gray-400">
-             <li className="hover:text-white cursor-pointer transition-colors">Editorials</li>
-             <li className="hover:text-white cursor-pointer transition-colors">Runway Reports</li>
-             <li className="hover:text-white cursor-pointer transition-colors">Beauty Lab</li>
-             <li className="hover:text-white cursor-pointer transition-colors">Designers</li>
+             <li className="hover:text-white cursor-pointer transition-colors"><Link to="/editorials">Editorials</Link></li>
+             <li className="hover:text-white cursor-pointer transition-colors"><Link to="/fashion">Runway Reports</Link></li>
+             <li className="hover:text-white cursor-pointer transition-colors"><Link to="/beauty">Beauty Lab</Link></li>
+             <li className="hover:text-white cursor-pointer transition-colors"><Link to="/shop">Shop Collection</Link></li>
            </ul>
         </div>
 
         <div>
            <h4 className="text-luxe-gold text-xs font-bold uppercase tracking-widest mb-6">Company</h4>
            <ul className="space-y-4 text-sm text-gray-400">
-             <li className="hover:text-white cursor-pointer transition-colors">About Us</li>
+             <li className="hover:text-white cursor-pointer transition-colors"><Link to="/about">About Us</Link></li>
              <li className="hover:text-white cursor-pointer transition-colors">Careers</li>
              <li className="hover:text-white cursor-pointer transition-colors">Press</li>
-             <li className="hover:text-white cursor-pointer transition-colors">Contact</li>
+             <li className="hover:text-white cursor-pointer transition-colors"><Link to="/contact">Contact</Link></li>
            </ul>
         </div>
 

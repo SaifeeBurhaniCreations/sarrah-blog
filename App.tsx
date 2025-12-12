@@ -10,6 +10,8 @@ import { Editorials } from './pages/Editorials';
 import { Shop } from './pages/Shop';
 import { ProductDetail } from './pages/ProductDetail';
 import { ArticleDetail } from './pages/ArticleDetail';
+import { About } from './pages/About';
+import { Contact } from './pages/Contact';
 import { ShopProvider } from './context/ShopContext';
 import { CartDrawer } from './components/CartDrawer';
 import { SearchOverlay } from './components/SearchOverlay';
@@ -40,6 +42,8 @@ const App: React.FC = () => {
               <Route path="/fashion" element={<Fashion />} />
               <Route path="/beauty" element={<Beauty />} />
               <Route path="/editorials" element={<Editorials />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

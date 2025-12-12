@@ -3,7 +3,7 @@ import { Button } from '../components/ui/Button';
 import { Category } from '../types';
 import { BlogService } from '../services/blogService';
 import { FileUploadService } from '../services/fileUploadService';
-import { PenTool, Layout, Image as ImageIcon, Sparkles, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { PenTool, Layout, Image as ImageIcon, Sparkles, Upload, CheckCircle, AlertCircle, Eye, X } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +25,7 @@ export const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'create' | 'dashboard'>('dashboard');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { 
     register, 
@@ -46,9 +47,10 @@ export const Admin: React.FC = () => {
   });
 
   // Watch values for preview or logic
-  const watchedImageUrl = watch('imageUrl');
-  const watchedTitle = watch('title');
-  const watchedCategory = watch('category');
+  const watchedValues = watch();
+  const watchedImageUrl = watchedValues.imageUrl;
+  const watchedTitle = watchedValues.title;
+  const watchedCategory = watchedValues.category;
 
   // Handle File Upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,6 +317,9 @@ export const Admin: React.FC = () => {
                     </div>
 
                     <div className="flex justify-end pt-6 border-t border-gray-100">
+                        <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="mr-4">
+                            <Eye size={18} className="mr-2" /> Preview
+                        </Button>
                         <Button type="submit" variant="primary" disabled={isSubmitting}>
                             {isSubmitting ? 'Publishing...' : 'Publish Editorial'}
                         </Button>
@@ -323,6 +328,61 @@ export const Admin: React.FC = () => {
             </div>
         )}
       </div>
+
+      {/* Full Screen Preview Modal */}
+      {showPreview && (
+          <div className="fixed inset-0 z-[100] bg-white overflow-y-auto animate-fade-in">
+              <div className="fixed top-6 right-6 z-[110]">
+                  <button 
+                      onClick={() => setShowPreview(false)}
+                      className="bg-black text-white px-6 py-3 rounded-full shadow-xl hover:bg-luxe-gold transition-colors flex items-center gap-2 font-bold uppercase text-xs tracking-widest"
+                  >
+                      <X size={18} /> Close Preview
+                  </button>
+              </div>
+              
+              <div className="min-h-screen bg-white">
+                 {/* Hero Image */}
+                 <div className="h-[60vh] md:h-[80vh] w-full relative overflow-hidden">
+                     {watchedValues.imageUrl ? (
+                          <img src={watchedValues.imageUrl} className="w-full h-full object-cover fixed top-0 left-0 -z-10" />
+                     ) : (
+                          <div className="w-full h-full bg-gray-200 fixed top-0 left-0 -z-10 flex items-center justify-center text-gray-400 font-serif italic text-2xl">No Image Selected</div>
+                     )}
+                     <div className="absolute inset-0 bg-black/40"></div>
+                     
+                     <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 bg-gradient-to-t from-black/80 to-transparent">
+                         <div className="container mx-auto">
+                              <div className="mb-4">
+                                  <span className="bg-luxe-gold text-luxe-black px-3 py-1 text-xs font-bold uppercase tracking-widest">{watchedValues.category}</span>
+                              </div>
+                              <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif text-white leading-tight mb-6 max-w-4xl drop-shadow-lg">
+                                  {watchedValues.title || "Untitled Article"}
+                              </h1>
+                              <div className="flex items-center gap-6 text-white/80 text-sm font-sans tracking-wide">
+                                  <span>By {watchedValues.author}</span>
+                                  <span className="w-1 h-1 bg-white rounded-full"></span>
+                                  <span>{new Date().toLocaleDateString()}</span>
+                              </div>
+                         </div>
+                     </div>
+                 </div>
+
+                 {/* Content Body */}
+                 <div className="relative bg-white pt-16 pb-24 px-6 md:px-0 -mt-10 rounded-t-[3rem] z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+                     <div className="container mx-auto max-w-3xl">
+                          <p className="text-2xl font-serif italic text-slate-700 leading-relaxed mb-10 border-l-4 border-luxe-gold pl-6">
+                              {watchedValues.excerpt || "No excerpt provided."}
+                          </p>
+
+                          <div className="prose prose-lg prose-slate font-serif max-w-none first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left first-letter:text-luxe-black whitespace-pre-wrap">
+                               {watchedValues.content || "Start writing to see content here..."}
+                          </div>
+                     </div>
+                 </div>
+              </div>
+          </div>
+      )}
     </div>
   );
 };
