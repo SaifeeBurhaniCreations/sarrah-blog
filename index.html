@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumière & Vogue | Editorial Beauty</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              serif: ['Playfair Display', 'serif'],
+              sans: ['Mulish', 'sans-serif'],
+            },
+            colors: {
+              'luxe-black': '#0a0a0a',
+              'luxe-gold': '#d4af37',
+              'luxe-gold-light': '#f3e5ab',
+              'luxe-rose': '#eec0c8',
+              'luxe-rose-dark': '#dbaeb5',
+              'luxe-cream': '#f9f8f6',
+              'luxe-charcoal': '#1a1a1a',
+            },
+            backgroundImage: {
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+              'noise': "url('https://grainy-gradients.vercel.app/noise.svg')",
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 1s ease-out forwards',
+              'fade-in': 'fadeIn 1.2s ease-out forwards',
+              'slide-in-right': 'slideInRight 1s ease-out forwards',
+              'float': 'float 6s ease-in-out infinite',
+              'spin-slow': 'spin 12s linear infinite',
+              'scroll': 'scroll 40s linear infinite',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(40px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideInRight: {
+                '0%': { opacity: '0', transform: 'translateX(40px)' },
+                '100%': { opacity: '1', transform: 'translateX(0)' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              scroll: {
+                '0%': { transform: 'translateX(0)' },
+                '100%': { transform: 'translateX(-50%)' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <!-- Google Fonts: Playfair Display (Serif) & Mulish (Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #f9f8f6; /* luxe-cream */
+        color: #0a0a0a;
+        overflow-x: hidden;
+      }
+      
+      /* Global Noise Overlay for Texture */
+      .bg-noise {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.4;
+      }
+
+      /* Glassmorphism Utilities */
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      
+      .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(212, 175, 55, 0.1); /* Subtle gold border */
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+      }
+
+      /* 3D Perspective Container */
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+      
+      .rotate-y-12 {
+        transform: rotateY(-12deg) rotateX(5deg);
+        transform-style: preserve-3d;
+      }
+      
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #d4af37;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #b5952f;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@18.2.0,react-dom@18.2.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?deps=react@18.2.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "react-hook-form": "https://esm.sh/react-hook-form@7.51.0?deps=react@18.2.0",
+    "zod": "https://esm.sh/zod@3.22.4",
+    "@hookform/resolvers/zod": "https://esm.sh/@hookform/resolvers@3.3.4/zod?deps=react@18.2.0,react-hook-form@7.51.0,zod@3.22.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@hookform/resolvers/": "https://esm.sh/@hookform/resolvers@^5.2.2/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div class="bg-noise"></div>
+    <div id="root"></div>
+  </body>
+</html>
