@@ -1,10 +1,12 @@
 import React from 'react';
-import { MOCK_PRODUCTS, MOCK_ARTICLES } from '../constants';
+import { MOCK_PRODUCTS } from '../constants';
 import { Category } from '../types';
-import { Star, Droplets, Sun, Sparkles } from 'lucide-react';
+import { Droplets, Sun, Sparkles } from 'lucide-react';
+import { useBlog } from '../context/BlogContext';
 
 export const Beauty: React.FC = () => {
-  const beautyArticles = MOCK_ARTICLES.filter(a => a.category === Category.BEAUTY);
+  const { articles } = useBlog();
+  const beautyArticles = articles.filter(a => a.category === Category.BEAUTY);
 
   return (
     <div className="min-h-screen pt-20 bg-rose-50/30">

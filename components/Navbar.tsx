@@ -35,12 +35,12 @@ export const Navbar: React.FC = () => {
         </button>
 
         {/* Logo */}
-        <Link to="/" className="group relative z-50">
-           <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tighter text-luxe-black group-hover:opacity-80 transition-opacity">
-            Lumière<span className="text-luxe-gold">.</span>
+        <Link to="/" className="group relative z-50 flex items-center gap-2">
+           <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tighter text-luxe-black group-hover:opacity-80 transition-opacity">
+            Burhani<span className="text-luxe-gold">.</span>
+            <span className="hidden md:inline font-sans font-light text-sm tracking-widest ml-1 text-slate-600">Creations</span>
            </h1>
-           {/* Decorative line under logo */}
-           <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-luxe-gold transition-all duration-300 group-hover:w-full"></span>
+           {/* Mobile Short Logo fallback handled by text size, but keeping structure clean */}
         </Link>
 
         {/* Desktop Nav */}

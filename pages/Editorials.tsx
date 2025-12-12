@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { MOCK_ARTICLES } from '../constants';
 import { Category } from '../types';
 import { Button } from '../components/ui/Button';
+import { useBlog } from '../context/BlogContext';
 
 export const Editorials: React.FC = () => {
   const [filter, setFilter] = useState<Category | 'All'>('All');
+  const { articles } = useBlog();
 
   const filteredArticles = filter === 'All' 
-    ? MOCK_ARTICLES 
-    : MOCK_ARTICLES.filter(a => a.category === filter);
+    ? articles 
+    : articles.filter(a => a.category === filter);
 
   return (
     <div className="min-h-screen pt-20 bg-white">

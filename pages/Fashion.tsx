@@ -1,11 +1,12 @@
 import React from 'react';
-import { MOCK_ARTICLES } from '../constants';
 import { Category } from '../types';
-import { ArrowRight, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { useBlog } from '../context/BlogContext';
 
 export const Fashion: React.FC = () => {
-  const fashionArticles = MOCK_ARTICLES.filter(a => a.category === Category.FASHION || a.category === Category.RUNWAY);
+  const { articles } = useBlog();
+  const fashionArticles = articles.filter(a => a.category === Category.FASHION || a.category === Category.RUNWAY);
   const featured = fashionArticles[0];
   const gridItems = fashionArticles.slice(1);
 

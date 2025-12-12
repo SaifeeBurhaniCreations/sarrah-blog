@@ -13,6 +13,7 @@ import { ArticleDetail } from './pages/ArticleDetail';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { ShopProvider } from './context/ShopContext';
+import { BlogProvider } from './context/BlogContext';
 import { CartDrawer } from './components/CartDrawer';
 import { SearchOverlay } from './components/SearchOverlay';
 
@@ -27,30 +28,32 @@ const ScrollToTop = () => {
 const App: React.FC = () => {
   return (
     <ShopProvider>
-      <Router>
-        <ScrollToTop />
-        <div className="flex flex-col min-h-screen font-sans text-luxe-charcoal selection:bg-luxe-rose selection:text-luxe-black relative">
-          <Navbar />
-          <CartDrawer />
-          <SearchOverlay />
-          <div className="flex-grow">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              <Route path="/articles/:id" element={<ArticleDetail />} />
-              <Route path="/fashion" element={<Fashion />} />
-              <Route path="/beauty" element={<Beauty />} />
-              <Route path="/editorials" element={<Editorials />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+      <BlogProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="flex flex-col min-h-screen font-sans text-luxe-charcoal selection:bg-luxe-rose selection:text-luxe-black relative">
+            <Navbar />
+            <CartDrawer />
+            <SearchOverlay />
+            <div className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/articles/:id" element={<ArticleDetail />} />
+                <Route path="/fashion" element={<Fashion />} />
+                <Route path="/beauty" element={<Beauty />} />
+                <Route path="/editorials" element={<Editorials />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
-      </Router>
+        </Router>
+      </BlogProvider>
     </ShopProvider>
   );
 };
