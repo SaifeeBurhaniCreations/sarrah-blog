@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingBag, Search } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search, User } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { useShop } from '../context/ShopContext';
+import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
 
 export const Navbar: React.FC = () => {
@@ -10,6 +11,7 @@ export const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { setIsCartOpen, setIsSearchOpen, cartItems } = useShop();
+  const { isAuthenticated } = useAuth();
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -20,6 +22,12 @@ export const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Filter Nav Items
+  const visibleNavItems = NAV_ITEMS.filter(item => {
+    if (item.path === '/admin') return isAuthenticated;
+    return true;
+  });
 
   return (
     <header 
@@ -42,7 +50,7 @@ export const Navbar: React.FC = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-10 items-center">
-          {NAV_ITEMS.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link 
               key={item.path} 
               to={item.path}
@@ -57,6 +65,11 @@ export const Navbar: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center space-x-6 text-luxe-black">
+          {!isAuthenticated && location.pathname !== '/login' && (
+             <Link to="/login" className="hover:text-luxe-gold transition-colors hidden md:block">
+                <User size={22} strokeWidth={1.5} />
+             </Link>
+          )}
           <button 
             onClick={() => setIsSearchOpen(true)}
             className="hover:text-luxe-gold transition-colors transform hover:scale-110 duration-300"
@@ -86,7 +99,7 @@ export const Navbar: React.FC = () => {
             <Logo />
          </Link>
 
-         {NAV_ITEMS.map((item) => (
+         {visibleNavItems.map((item) => (
             <Link 
               key={item.path} 
               to={item.path}
@@ -97,6 +110,11 @@ export const Navbar: React.FC = () => {
               <span className="absolute -bottom-2 left-0 w-0 h-1 bg-luxe-gold transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
+          {!isAuthenticated && (
+              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="text-xl uppercase tracking-widest font-bold text-slate-500 mt-8">
+                  Login
+              </Link>
+          )}
       </div>
     </header>
   );
