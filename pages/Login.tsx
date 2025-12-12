@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
+import { useToast } from '../context/ToastContext';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -15,9 +17,10 @@ export const Login: React.FC = () => {
     // Simulate login validation
     if (email && password) {
         login();
+        addToast("Welcome back, Editor.", "success");
         navigate('/admin');
     } else {
-        alert("Please enter credentials");
+        addToast("Please enter valid credentials", "error");
     }
   };
 
