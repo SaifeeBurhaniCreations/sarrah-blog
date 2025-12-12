@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { 
   Bold, Italic, List, Heading1, Heading2, Quote, 
   AlignLeft, AlignCenter, Minus, Image as ImageIcon,
-  LayoutGrid, Maximize, Frame, ShoppingBag, Plus, X, Trash2, Film
+  LayoutGrid, Maximize, Frame, ShoppingBag, Plus, X, Trash2, Film,
+  Undo, Redo
 } from 'lucide-react';
 import { FileUploadService } from '../services/fileUploadService';
 import { Button } from './ui/Button';
@@ -105,28 +106,37 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         let htmlToInsert = '';
 
         if (insertType === 'image') {
-            // Large Hero
-            htmlToInsert = `<div class="my-8 group relative" contenteditable="false">
-                <img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg" alt="Editorial Image" />
+            // Large Hero - wrapped in p tag break to ensure isolation
+            htmlToInsert = `
+            <p><br/></p>
+            <div class="my-8 group relative w-full block clear-both" contenteditable="false">
+                <img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg block" alt="Editorial Image" />
                 <p class="text-center text-xs text-gray-400 mt-2 italic">Figure: Full Width Display</p>
-            </div><p><br/></p>`;
+            </div>
+            <p><br/></p>`;
         } 
         else if (insertType === 'polaroid') {
             // Polaroid
-            htmlToInsert = `<div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0" contenteditable="false">
+            htmlToInsert = `
+            <div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0 z-10 relative" contenteditable="false">
                 <img src="${uploads[0]}" class="w-full h-auto mb-3" />
                 <p class="font-serif italic text-center text-sm text-gray-500">Featured Look</p>
-            </div><p><br/></p>`;
+            </div>`;
         }
         else if (insertType === 'gallery') {
             // Grid Gallery
             const imagesHtml = uploads.map(url => 
-                `<div class="aspect-[3/4] overflow-hidden rounded-md cursor-pointer group"><img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" /></div>`
+                `<div class="aspect-[3/4] overflow-hidden rounded-md cursor-pointer group relative">
+                    <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                </div>`
             ).join('');
-            htmlToInsert = `<div class="my-8" contenteditable="false">
+            htmlToInsert = `
+            <p><br/></p>
+            <div class="my-10 w-full block clear-both" contenteditable="false">
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">${imagesHtml}</div>
                 <p class="text-center text-xs text-gray-400 mt-2 italic">Gallery: ${uploads.length} Images</p>
-            </div><p><br/></p>`;
+            </div>
+            <p><br/></p>`;
         }
         else if (insertType === 'image-carousel') {
              // Horizontal Scroll Image Strip
@@ -135,14 +145,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
                     <img src="${url}" class="w-full h-full object-cover" />
                  </div>`
              ).join('');
-             htmlToInsert = `<div class="my-10 relative group" contenteditable="false">
-                 <div class="absolute -left-4 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10"></div>
-                 <div class="absolute -right-4 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10"></div>
+             htmlToInsert = `
+             <p><br/></p>
+             <div class="my-12 relative group w-full block clear-both" contenteditable="false">
+                 <div class="absolute -left-4 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+                 <div class="absolute -right-4 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
                  <div class="flex overflow-x-auto gap-4 py-4 px-1 snap-x snap-mandatory no-scrollbar">
                     ${imagesHtml}
                  </div>
                  <p class="text-center text-xs text-gray-400 mt-1 uppercase tracking-widest">Swipe to View</p>
-             </div><p><br/></p>`;
+             </div>
+             <p><br/></p>`;
         }
 
         document.execCommand('insertHTML', false, htmlToInsert);
@@ -153,6 +166,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
           alert("Failed to upload image(s).");
       } finally {
           setInsertType(null);
+          if (fileInputRef.current) fileInputRef.current.value = '';
       }
   };
 
@@ -192,36 +206,43 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       if (productItems.length === 0) return;
 
       const itemsHtml = productItems.map(item => `
-        <div class="min-w-[260px] md:min-w-[300px] snap-center group/card perspective-1000">
-             <div class="relative bg-white rounded-xl p-3 shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
-                 <div class="aspect-[4/5] bg-gray-50 rounded-lg mb-4 overflow-hidden relative">
-                      <img src="${item.image}" class="w-full h-full object-cover mix-blend-multiply" />
-                      <div class="absolute inset-0 bg-black/5 opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
-                      <button class="absolute bottom-3 left-1/2 -translate-x-1/2 w-[90%] bg-luxe-black text-white text-xs py-2 uppercase font-bold tracking-widest opacity-0 group-hover/card:opacity-100 translate-y-2 group-hover/card:translate-y-0 transition-all duration-300 shadow-lg rounded-sm">
-                          Add to Bag
-                      </button>
-                      <button class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm opacity-0 group-hover/card:opacity-100 transition-opacity">
-                         ♥
-                      </button>
+        <div class="min-w-[280px] md:min-w-[340px] snap-center group perspective-1000 pl-4">
+             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100">
+                 
+                 <div class="absolute top-6 left-6 z-20 bg-luxe-black/5 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest text-luxe-black">
+                     Editor's Pick
                  </div>
+
+                 <div class="aspect-[4/5] bg-gray-50 rounded-xl mb-6 overflow-hidden relative">
+                      <img src="${item.image}" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 hover:scale-110" />
+                      
+                      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] opacity-0 hover:opacity-100 translate-y-4 hover:translate-y-0 transition-all duration-300">
+                          <button class="w-full py-3 bg-luxe-black text-white text-xs uppercase font-bold tracking-widest flex items-center justify-center gap-2 shadow-lg hover:bg-luxe-gold hover:text-black transition-colors rounded-sm">
+                              Add to Bag
+                          </button>
+                      </div>
+                 </div>
+                 
                  <div class="text-center px-2 pb-2">
-                     <h4 class="font-serif text-lg text-luxe-black mb-1 truncate">${item.title}</h4>
-                     <p class="font-bold text-luxe-gold">$${item.price}</p>
+                     <h4 class="font-serif text-xl text-luxe-black mb-2 truncate hover:text-luxe-gold transition-colors">${item.title}</h4>
+                     <p class="font-bold text-lg text-luxe-charcoal">$${item.price}</p>
                  </div>
              </div>
         </div>
       `).join('');
 
       const carouselHtml = `
-      <div class="my-12 py-8 bg-luxe-cream/30 border-y border-luxe-gold/10 relative" contenteditable="false">
-          <div class="text-center mb-6">
-             <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-luxe-gold">Shop The Look</span>
-             <h3 class="font-serif text-2xl text-luxe-black">Featured Products</h3>
+      <p><br/></p>
+      <div class="my-16 py-10 bg-gradient-to-b from-white via-luxe-cream/50 to-white border-y border-luxe-gold/10 relative w-full block clear-both" contenteditable="false">
+          <div class="container mx-auto px-4 mb-8 text-center">
+             <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-luxe-gold block mb-2">Shop The Story</span>
+             <h3 class="font-serif text-3xl text-luxe-black">Curated Collection</h3>
           </div>
-          <div class="flex overflow-x-auto gap-6 px-6 pb-6 snap-x snap-mandatory no-scrollbar">
+          <div class="flex overflow-x-auto pb-10 pt-4 px-4 gap-4 snap-x snap-mandatory no-scrollbar relative z-10">
               ${itemsHtml}
           </div>
-      </div><p><br/></p>`;
+      </div>
+      <p><br/></p>`;
 
       contentRef.current?.focus();
       document.execCommand('insertHTML', false, carouselHtml);
@@ -249,7 +270,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     >
       <Icon size={18} />
       {/* Tooltip */}
-      <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+      <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none font-sans">
           {label}
       </span>
     </button>
@@ -260,6 +281,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm sticky top-0 z-40 rounded-t-lg">
+        <ToolbarButton icon={Undo} command="undo" label="Undo" />
+        <ToolbarButton icon={Redo} command="redo" label="Redo" />
+        <div className="w-[1px] h-5 bg-gray-300 mx-1"></div>
+        
         <ToolbarButton icon={Heading1} command="formatBlock" arg="H2" label="Heading Large" isActive={activeFormats.formatBlockH2} />
         <ToolbarButton icon={Heading2} command="formatBlock" arg="H3" label="Heading Medium" isActive={activeFormats.formatBlockH3} />
         <div className="w-[1px] h-5 bg-gray-300 mx-1"></div>
