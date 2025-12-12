@@ -286,14 +286,15 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (productItems.length === 0) return;
 
       const itemsHtml = productItems.map(item => `
-        <div class="min-w-[280px] md:min-w-[340px] snap-center group perspective-1000 pl-4">
-             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100">
+        <div class="min-w-[280px] md:min-w-[340px] snap-center group perspective-1000 pl-4 h-full">
+             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100 h-full flex flex-col">
                  
-                 <div class="absolute top-6 left-6 z-20 bg-luxe-black/5 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest text-luxe-black">
-                     Editor's Pick
+                 <!-- Badge with improved visibility -->
+                 <div class="absolute top-6 left-6 z-[30] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-sm shadow-sm">
+                     <span class="text-[10px] font-bold uppercase tracking-widest text-luxe-black">Editor's Pick</span>
                  </div>
 
-                 <div class="aspect-[4/5] bg-gray-50 rounded-xl mb-6 overflow-hidden relative">
+                 <div class="aspect-[4/5] bg-gray-50 rounded-xl mb-6 overflow-hidden relative flex-shrink-0">
                       <img src="${item.image}" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 hover:scale-110" />
                       
                       <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] opacity-0 hover:opacity-100 translate-y-4 hover:translate-y-0 transition-all duration-300">
@@ -303,8 +304,18 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       </div>
                  </div>
                  
-                 <div class="text-center px-2 pb-2">
-                     <h4 class="font-serif text-xl text-luxe-black mb-2 truncate hover:text-luxe-gold transition-colors">${item.title}</h4>
+                 <div class="text-center px-2 pb-2 flex-grow flex flex-col justify-end">
+                     <h4 class="font-serif text-xl text-luxe-black mb-1 truncate hover:text-luxe-gold transition-colors">${item.title}</h4>
+                     
+                     <!-- Star Rating -->
+                     <div class="flex justify-center gap-1 my-2">
+                        <span class="text-amber-400 text-xs">★</span>
+                        <span class="text-amber-400 text-xs">★</span>
+                        <span class="text-amber-400 text-xs">★</span>
+                        <span class="text-amber-400 text-xs">★</span>
+                        <span class="text-amber-400 text-xs">★</span>
+                     </div>
+
                      <p class="font-bold text-lg text-luxe-charcoal">$${item.price}</p>
                  </div>
              </div>
@@ -318,7 +329,7 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-luxe-gold block mb-2">Shop The Story</span>
              <h3 class="font-serif text-3xl text-luxe-black">Curated Collection</h3>
           </div>
-          <div class="flex overflow-x-auto pb-10 pt-4 px-4 gap-4 snap-x snap-mandatory no-scrollbar relative z-10">
+          <div class="flex overflow-x-auto pb-10 pt-4 px-4 gap-4 snap-x snap-mandatory no-scrollbar relative z-10 items-stretch">
               ${itemsHtml}
           </div>
       </div>
