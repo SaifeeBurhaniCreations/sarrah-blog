@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { Category, Article } from '../types';
 import { FileUploadService } from '../services/fileUploadService';
-import { PenTool, Layout, Image as ImageIcon, Sparkles, Upload, CheckCircle, AlertCircle, Eye, X, Save, FileText } from 'lucide-react';
+import { PenTool, Layout, Image as ImageIcon, Sparkles, Upload, CheckCircle, AlertCircle, Eye, X, Save, FileText, Activity, Users, FileBarChart, TrendingUp } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,8 +29,45 @@ export const Admin: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
-  const { addArticle } = useBlog();
+  const { addArticle, articles } = useBlog();
   const { addToast } = useToast();
+
+  // Real-time Analytics State
+  const [metrics, setMetrics] = useState({
+      activeVisitors: 124,
+      subscribers: 45200,
+      activeArticles: 84
+  });
+
+  // Simulate Real-time updates
+  useEffect(() => {
+    // Visitor Fluctuation Loop
+    const visitorInterval = setInterval(() => {
+        setMetrics(prev => ({
+            ...prev,
+            activeVisitors: Math.max(80, prev.activeVisitors + Math.floor(Math.random() * 7) - 3)
+        }));
+    }, 2000);
+
+    // Subscriber Growth Loop (slower)
+    const subscriberInterval = setInterval(() => {
+        if (Math.random() > 0.7) {
+             setMetrics(prev => ({
+                ...prev,
+                subscribers: prev.subscribers + 1
+             }));
+             // Occasionally flash a toast for new sub? Maybe too annoying.
+        }
+    }, 5000);
+
+    // Sync active articles count
+    setMetrics(prev => ({ ...prev, activeArticles: articles.length }));
+
+    return () => {
+        clearInterval(visitorInterval);
+        clearInterval(subscriberInterval);
+    };
+  }, [articles.length]);
 
   const { 
     register, 
@@ -227,20 +264,41 @@ export const Admin: React.FC = () => {
 
         {activeTab === 'dashboard' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
-                <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-lg">
-                    <h3 className="text-slate-500 uppercase tracking-widest text-xs font-bold mb-2">Total Views</h3>
-                    <p className="text-4xl font-serif text-luxe-black">1.2M</p>
-                    <span className="text-green-500 text-sm font-semibold">+12% this week</span>
+                {/* Live Visitors */}
+                <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-lg relative overflow-hidden group">
+                    <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-slate-500 uppercase tracking-widest text-xs font-bold">Live Visitors</h3>
+                        <div className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </div>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-5xl font-serif text-luxe-black">{metrics.activeVisitors}</p>
+                        <TrendingUp size={16} className="text-green-500 mb-1" />
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">Currently browsing the site</p>
+                    <Activity className="absolute -bottom-4 -right-4 text-gray-50 opacity-20 group-hover:opacity-40 transition-opacity" size={100} />
                 </div>
-                <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-lg">
-                    <h3 className="text-slate-500 uppercase tracking-widest text-xs font-bold mb-2">Active Articles</h3>
-                    <p className="text-4xl font-serif text-luxe-black">84</p>
-                    <span className="text-slate-400 text-sm">Latest posted 2h ago</span>
+
+                {/* Active Articles */}
+                <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-lg relative overflow-hidden group">
+                     <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-slate-500 uppercase tracking-widest text-xs font-bold">Published Stories</h3>
+                        <FileBarChart size={16} className="text-slate-300" />
+                    </div>
+                    <p className="text-5xl font-serif text-luxe-black">{metrics.activeArticles}</p>
+                    <span className="text-slate-400 text-xs mt-2 block">Available to public</span>
                 </div>
-                <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-lg">
-                    <h3 className="text-slate-500 uppercase tracking-widest text-xs font-bold mb-2">Subscribers</h3>
-                    <p className="text-4xl font-serif text-luxe-black">45.2k</p>
-                    <span className="text-green-500 text-sm font-semibold">+85 new today</span>
+
+                {/* Subscribers */}
+                <div className="bg-white p-8 shadow-sm border border-gray-100 rounded-lg relative overflow-hidden group">
+                    <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-slate-500 uppercase tracking-widest text-xs font-bold">Total Subscribers</h3>
+                        <Users size={16} className="text-slate-300" />
+                    </div>
+                    <p className="text-5xl font-serif text-luxe-black">{(metrics.subscribers / 1000).toFixed(1)}k</p>
+                    <span className="text-green-500 text-xs font-semibold mt-2 block">+12 today</span>
                 </div>
             </div>
         )}

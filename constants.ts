@@ -95,6 +95,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 32,
     currency: '$',
     imageUrl: 'https://picsum.photos/seed/makeup1/400/400',
+    category: 'Makeup',
     description: "A volume-boosting mascara that delivers instant drama and definition. The velvet-black formula is enriched with conditioning peptides to strengthen lashes over time."
   },
   {
@@ -104,6 +105,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 120,
     currency: '$',
     imageUrl: 'https://picsum.photos/seed/scarf1/400/400',
+    category: 'Accessories',
     description: "Hand-rolled edges and 100% mulberry silk make this scarf a timeless addition to any wardrobe. Featuring a custom print inspired by Art Deco architecture."
   },
   {
@@ -113,6 +115,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 85,
     currency: '$',
     imageUrl: 'https://picsum.photos/seed/cream1/400/400',
+    category: 'Skincare',
     description: "A rich, restorative night cream infused with black obsidian extract to detoxify and rejuvenate tired skin while you sleep."
   },
   {
@@ -122,6 +125,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 150,
     currency: '$',
     imageUrl: 'https://picsum.photos/seed/serum/400/400',
+    category: 'Skincare',
     description: "Suspended 24k gold flakes in a hyaluronic acid base provide instant illumination and deep hydration. A true luxury for your daily ritual."
   },
   {
@@ -131,6 +135,27 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 65,
     currency: '$',
     imageUrl: 'https://picsum.photos/seed/powder/400/400',
+    category: 'Makeup',
     description: "Finely milled finishing powder that blurs imperfections and sets makeup with a soft-focus, diamond-like glow. Universal shade for all skin tones."
   },
+  {
+    id: 'p6',
+    name: 'Rose Oud Eau de Parfum',
+    brand: 'Scent Lab',
+    price: 180,
+    currency: '$',
+    imageUrl: 'https://picsum.photos/seed/perfume1/400/400',
+    category: 'Fragrance',
+    description: "A deep, sensual blend of damask rose, rich oud wood, and spiced amber. A scent that lingers like a memory."
+  },
+  {
+    id: 'p7',
+    name: 'Structured Leather Tote',
+    brand: 'Vogue',
+    price: 450,
+    currency: '$',
+    imageUrl: 'https://picsum.photos/seed/bag1/400/400',
+    category: 'Accessories',
+    description: "Minimalist design meets maximum utility. Crafted from Italian calf leather with gold-tone hardware."
+  }
 ];

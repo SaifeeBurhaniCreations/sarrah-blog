@@ -5,6 +5,8 @@ export enum Category {
   RUNWAY = 'Runway'
 }
 
+export type ProductCategory = 'Skincare' | 'Makeup' | 'Accessories' | 'Fragrance' | 'Ready-to-Wear';
+
 export interface Article {
   id: string;
   title: string;
@@ -24,6 +26,7 @@ export interface Product {
   currency: string;
   imageUrl: string;
   brand: string;
+  category: ProductCategory;
   description?: string;
 }
 
