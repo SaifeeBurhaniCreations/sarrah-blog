@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { FileUploadService } from '../services/fileUploadService';
 import { Button } from './ui/Button';
+import { useToast } from '../context/ToastContext';
 
 interface RichTextEditorProps {
   value: string;
@@ -25,6 +26,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const contentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isUpdatingRef = useRef(false);
+  const { addToast } = useToast();
   
   // Editor State
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({});
@@ -74,8 +76,48 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     }
   };
 
+  // Global listener for removals inside the editor content
+  const handleEditorClick = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Check if clicked element is a remove button or inside one
+      const removeBtn = target.closest('.remove-component-btn');
+      
+      if (removeBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const component = removeBtn.closest('.removable-component');
+          if (component) {
+              component.remove();
+              handleInput();
+              addToast('Element removed', 'success');
+          }
+      } else {
+          checkFormats();
+      }
+  };
+
   const execCommand = (command: string, value: string | undefined = undefined) => {
-    document.execCommand(command, false, value);
+    if (command === 'formatBlock' && value === 'BLOCKQUOTE') {
+        // Custom Blockquote Insertion to make it removable
+        const quoteHtml = `
+        <div class="removable-component relative group my-8 pl-6 border-l-4 border-luxe-gold" contenteditable="false">
+             <button class="remove-component-btn absolute -top-4 -right-4 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-sm" title="Remove Quote"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+             <blockquote contenteditable="true" class="italic text-xl text-luxe-charcoal font-serif focus:outline-none">Type your quote here...</blockquote>
+        </div>
+        <p><br/></p>`;
+        document.execCommand('insertHTML', false, quoteHtml);
+    } else if (command === 'insertHorizontalRule') {
+         // Custom Divider
+         const dividerHtml = `
+         <div class="removable-component relative group my-8" contenteditable="false">
+             <button class="remove-component-btn absolute -top-4 right-1/2 translate-x-1/2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-sm" title="Remove Divider"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+             <hr class="border-t border-gray-200" />
+         </div>
+         <p><br/></p>`;
+         document.execCommand('insertHTML', false, dividerHtml);
+    } else {
+        document.execCommand(command, false, value);
+    }
     contentRef.current?.focus();
     handleInput();
     checkFormats();
@@ -85,7 +127,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
   const triggerImageUpload = (type: 'image' | 'gallery' | 'polaroid' | 'image-carousel') => {
       setInsertType(type);
-      // Wait for React to update the 'multiple' attribute on the input based on the new insertType state
       setTimeout(() => {
           if (fileInputRef.current) {
               fileInputRef.current.value = '';
@@ -98,7 +139,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       const files = e.target.files;
       if (!files || files.length === 0) return;
 
-      contentRef.current?.focus(); // Focus editor to ensure insertion point
+      contentRef.current?.focus(); 
 
       try {
         const uploads = await Promise.all(
@@ -106,42 +147,48 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         );
 
         let htmlToInsert = '';
+        
+        // Helper to generate remove button
+        const removeButton = `
+            <button class="remove-component-btn absolute top-2 right-2 z-50 bg-white text-red-500 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50" title="Remove Component">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        `;
 
         if (insertType === 'image') {
-            // Large Hero - wrapped in p tag break to ensure isolation
             htmlToInsert = `
             <p><br/></p>
-            <div class="my-8 group relative w-full block clear-both" contenteditable="false">
+            <div class="removable-component my-8 group relative w-full block clear-both" contenteditable="false">
+                ${removeButton}
                 <img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg block" alt="Editorial Image" />
-                <p class="text-center text-xs text-gray-400 mt-2 italic">Figure: Full Width Display</p>
+                <p class="text-center text-xs text-gray-400 mt-2 italic" contenteditable="true">Figure: Full Width Display</p>
             </div>
             <p><br/></p>`;
         } 
         else if (insertType === 'polaroid') {
-            // Polaroid
             htmlToInsert = `
-            <div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0 z-10 relative" contenteditable="false">
+            <div class="removable-component float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0 z-10 relative group" contenteditable="false">
+                ${removeButton}
                 <img src="${uploads[0]}" class="w-full h-auto mb-3" />
-                <p class="font-serif italic text-center text-sm text-gray-500">Featured Look</p>
+                <p class="font-serif italic text-center text-sm text-gray-500" contenteditable="true">Featured Look</p>
             </div>`;
         }
         else if (insertType === 'gallery') {
-            // Grid Gallery
             const imagesHtml = uploads.map(url => 
-                `<div class="aspect-[3/4] overflow-hidden rounded-md cursor-pointer group relative">
-                    <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                `<div class="aspect-[3/4] overflow-hidden rounded-md cursor-pointer group/item relative">
+                    <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" />
                 </div>`
             ).join('');
             htmlToInsert = `
             <p><br/></p>
-            <div class="my-10 w-full block clear-both" contenteditable="false">
+            <div class="removable-component my-10 w-full block clear-both relative group" contenteditable="false">
+                ${removeButton}
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">${imagesHtml}</div>
                 <p class="text-center text-xs text-gray-400 mt-2 italic">Gallery: ${uploads.length} Images</p>
             </div>
             <p><br/></p>`;
         }
         else if (insertType === 'image-carousel') {
-             // Horizontal Scroll Image Strip
              const imagesHtml = uploads.map(url => 
                 `<div class="min-w-[300px] h-[400px] snap-center rounded-lg overflow-hidden flex-shrink-0">
                     <img src="${url}" class="w-full h-full object-cover" />
@@ -149,7 +196,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
              ).join('');
              htmlToInsert = `
              <p><br/></p>
-             <div class="my-12 relative group w-full block clear-both" contenteditable="false">
+             <div class="removable-component my-12 relative group w-full block clear-both" contenteditable="false">
+                 ${removeButton}
                  <div class="absolute -left-4 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
                  <div class="absolute -right-4 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
                  <div class="flex overflow-x-auto gap-4 py-4 px-1 snap-x snap-mandatory no-scrollbar">
@@ -162,10 +210,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
         document.execCommand('insertHTML', false, htmlToInsert);
         handleInput();
+        addToast("Media inserted successfully", "success");
 
       } catch (error) {
           console.error("Editor upload failed", error);
-          alert("Failed to upload image(s).");
+          addToast("Failed to upload image(s)", "error");
       } finally {
           setInsertType(null);
           if (fileInputRef.current) fileInputRef.current.value = '';
@@ -177,7 +226,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const handleAddProduct = async () => {
       const file = productFileInputRef.current?.files?.[0];
       if (!file || !currentProduct.title || !currentProduct.price) {
-          alert("Please fill in all fields and select an image.");
+          addToast("Please fill in all fields and select an image.", "error");
           return;
       }
       
@@ -208,10 +257,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       if (productItems.length === 0) return;
 
       const itemsHtml = productItems.map(item => `
-        <div class="min-w-[280px] max-w-[300px] snap-center group perspective-1000 pl-4 h-full flex flex-col">
+        <div class="min-w-[280px] max-w-[300px] snap-center group/card perspective-1000 pl-4 h-full flex flex-col">
              <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100 flex-1 flex flex-col">
                  
-                 <!-- Badge with improved visibility -->
                  <div class="absolute top-4 left-4 z-[30] bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-sm shadow-sm border border-gray-100">
                      <span class="text-[10px] font-bold uppercase tracking-widest text-luxe-black whitespace-nowrap">Editor's Pick</span>
                  </div>
@@ -229,7 +277,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
                  <div class="text-center px-2 flex-grow flex flex-col justify-end">
                      <h4 class="font-serif text-lg text-luxe-black mb-1 truncate w-full hover:text-luxe-gold transition-colors" title="${item.title}">${item.title}</h4>
                      
-                     <!-- Star Rating -->
                      <div class="flex justify-center gap-1 my-2">
                         <span class="text-amber-400 text-xs">★</span>
                         <span class="text-amber-400 text-xs">★</span>
@@ -246,7 +293,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
       const carouselHtml = `
       <p><br/></p>
-      <div class="my-16 py-10 bg-gradient-to-b from-white via-luxe-cream/50 to-white border-y border-luxe-gold/10 relative w-full block clear-both" contenteditable="false">
+      <div class="removable-component my-16 py-10 bg-gradient-to-b from-white via-luxe-cream/50 to-white border-y border-luxe-gold/10 relative w-full block clear-both group" contenteditable="false">
+          <button class="remove-component-btn absolute top-2 right-2 z-50 bg-white text-red-500 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50" title="Remove Product Carousel">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
           <div class="container mx-auto px-4 mb-8 text-center">
              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-luxe-gold block mb-2">Shop The Story</span>
              <h3 class="font-serif text-3xl text-luxe-black">Curated Collection</h3>
@@ -261,9 +311,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       document.execCommand('insertHTML', false, carouselHtml);
       handleInput();
       
-      // Reset & Close
       setProductItems([]);
       setIsProductModalOpen(false);
+      addToast("Product carousel inserted", "success");
   };
 
   const ToolbarButton = ({ icon: Icon, command, arg, label, isActive, onClick }: any) => (
@@ -282,7 +332,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       title={label}
     >
       <Icon size={18} />
-      {/* Tooltip */}
       <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none font-sans">
           {label}
       </span>
@@ -337,7 +386,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         onInput={handleInput}
         onKeyUp={checkFormats}
         onMouseUp={checkFormats}
-        onClick={checkFormats}
+        onClick={handleEditorClick}
         className="min-h-[500px] p-8 focus:outline-none prose prose-slate max-w-none 
           prose-headings:font-serif prose-headings:font-normal prose-headings:text-luxe-black
           prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6
