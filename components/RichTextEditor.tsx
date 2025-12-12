@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { 
   Bold, Italic, List, Heading1, Heading2, Quote, 
   AlignLeft, AlignCenter, Minus, Image as ImageIcon,
-  LayoutGrid, Maximize, Frame
+  LayoutGrid, Maximize, Frame, ShoppingBag, Plus, X, Trash2, Film
 } from 'lucide-react';
 import { FileUploadService } from '../services/fileUploadService';
+import { Button } from './ui/Button';
 
 interface RichTextEditorProps {
   value: string;
@@ -12,14 +13,31 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
+interface ProductItem {
+  id: string;
+  title: string;
+  price: string;
+  image: string;
+}
+
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isUpdatingRef = useRef(false);
+  
+  // Editor State
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({});
-  const [insertType, setInsertType] = useState<'image' | 'gallery' | 'polaroid' | null>(null);
+  const [insertType, setInsertType] = useState<'image' | 'gallery' | 'polaroid' | 'image-carousel' | null>(null);
 
-  // Sync initial value or external updates
+  // Product Carousel Modal State
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productItems, setProductItems] = useState<ProductItem[]>([]);
+  const [currentProduct, setCurrentProduct] = useState({ title: '', price: '' });
+  const [isUploadingProduct, setIsUploadingProduct] = useState(false);
+  const productFileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- Synchronization & Formats ---
+
   useEffect(() => {
     if (contentRef.current && !isUpdatingRef.current) {
         if (contentRef.current.innerHTML !== value) {
@@ -29,16 +47,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   }, [value]);
 
   const checkFormats = () => {
-    setActiveFormats({
-        bold: document.queryCommandState('bold'),
-        italic: document.queryCommandState('italic'),
-        insertUnorderedList: document.queryCommandState('insertUnorderedList'),
-        justifyLeft: document.queryCommandState('justifyLeft'),
-        justifyCenter: document.queryCommandState('justifyCenter'),
-        formatBlockH2: document.queryCommandValue('formatBlock') === 'h2',
-        formatBlockH3: document.queryCommandValue('formatBlock') === 'h3',
-        formatBlockQuote: document.queryCommandValue('formatBlock') === 'blockquote',
-    });
+    if (!document) return;
+    try {
+        setActiveFormats({
+            bold: document.queryCommandState('bold'),
+            italic: document.queryCommandState('italic'),
+            insertUnorderedList: document.queryCommandState('insertUnorderedList'),
+            justifyLeft: document.queryCommandState('justifyLeft'),
+            justifyCenter: document.queryCommandState('justifyCenter'),
+            formatBlockH2: document.queryCommandValue('formatBlock') === 'h2',
+            formatBlockH3: document.queryCommandValue('formatBlock') === 'h3',
+            formatBlockQuote: document.queryCommandValue('formatBlock') === 'blockquote',
+        });
+    } catch (e) {
+        // Ignore errors if selection invalid
+    }
   };
 
   const handleInput = () => {
@@ -54,23 +77,27 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     document.execCommand(command, false, value);
     contentRef.current?.focus();
     handleInput();
+    checkFormats();
   };
 
-  // Image Handling
-  const triggerImageUpload = (type: 'image' | 'gallery' | 'polaroid') => {
+  // --- Image & Gallery Handling ---
+
+  const triggerImageUpload = (type: 'image' | 'gallery' | 'polaroid' | 'image-carousel') => {
       setInsertType(type);
-      fileInputRef.current?.click();
+      if (fileInputRef.current) {
+          // Reset value to allow re-selecting same file
+          fileInputRef.current.value = '';
+          fileInputRef.current.click();
+      }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || files.length === 0) return;
 
-      // Restore focus to editor so insertion happens at cursor
-      contentRef.current?.focus();
+      contentRef.current?.focus(); // Focus editor to ensure insertion point
 
       try {
-        // Upload all selected files
         const uploads = await Promise.all(
             Array.from(files).map(file => FileUploadService.uploadImage(file))
         );
@@ -78,20 +105,44 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         let htmlToInsert = '';
 
         if (insertType === 'image') {
-            // Large Hero Image
-            htmlToInsert = `<div class="my-8"><img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg" alt="Editorial Image" /><p class="text-center text-xs text-gray-400 mt-2 italic">Figure: Editorial Showcase</p></div><br/>`;
-        } else if (insertType === 'gallery') {
-            // Grid Gallery (Responsive)
-            const imagesHtml = uploads.map(url => 
-                `<div class="aspect-[3/4] overflow-hidden rounded-md"><img src="${url}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" /></div>`
-            ).join('');
-            htmlToInsert = `<div class="grid grid-cols-2 md:grid-cols-3 gap-4 my-8">${imagesHtml}</div><br/>`;
-        } else if (insertType === 'polaroid') {
-            // Artistic "Polaroid" style float
-            htmlToInsert = `<div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm">
+            // Large Hero
+            htmlToInsert = `<div class="my-8 group relative" contenteditable="false">
+                <img src="${uploads[0]}" class="w-full h-auto rounded-lg shadow-lg" alt="Editorial Image" />
+                <p class="text-center text-xs text-gray-400 mt-2 italic">Figure: Full Width Display</p>
+            </div><p><br/></p>`;
+        } 
+        else if (insertType === 'polaroid') {
+            // Polaroid
+            htmlToInsert = `<div class="float-right ml-6 mb-4 p-3 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] rotate-2 border border-gray-100 max-w-xs rounded-sm transition-transform hover:rotate-0" contenteditable="false">
                 <img src="${uploads[0]}" class="w-full h-auto mb-3" />
-                <p class="font-handwriting text-center text-sm text-gray-500">Featured Look</p>
-            </div>`;
+                <p class="font-serif italic text-center text-sm text-gray-500">Featured Look</p>
+            </div><p><br/></p>`;
+        }
+        else if (insertType === 'gallery') {
+            // Grid Gallery
+            const imagesHtml = uploads.map(url => 
+                `<div class="aspect-[3/4] overflow-hidden rounded-md cursor-pointer group"><img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" /></div>`
+            ).join('');
+            htmlToInsert = `<div class="my-8" contenteditable="false">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">${imagesHtml}</div>
+                <p class="text-center text-xs text-gray-400 mt-2 italic">Gallery: ${uploads.length} Images</p>
+            </div><p><br/></p>`;
+        }
+        else if (insertType === 'image-carousel') {
+             // Horizontal Scroll Image Strip
+             const imagesHtml = uploads.map(url => 
+                `<div class="min-w-[300px] h-[400px] snap-center rounded-lg overflow-hidden flex-shrink-0">
+                    <img src="${url}" class="w-full h-full object-cover" />
+                 </div>`
+             ).join('');
+             htmlToInsert = `<div class="my-10 relative group" contenteditable="false">
+                 <div class="absolute -left-4 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10"></div>
+                 <div class="absolute -right-4 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10"></div>
+                 <div class="flex overflow-x-auto gap-4 py-4 px-1 snap-x snap-mandatory no-scrollbar">
+                    ${imagesHtml}
+                 </div>
+                 <p class="text-center text-xs text-gray-400 mt-1 uppercase tracking-widest">Swipe to View</p>
+             </div><p><br/></p>`;
         }
 
         document.execCommand('insertHTML', false, htmlToInsert);
@@ -99,20 +150,97 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
       } catch (error) {
           console.error("Editor upload failed", error);
+          alert("Failed to upload image(s).");
       } finally {
           setInsertType(null);
-          if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
       }
   };
 
-  const ToolbarButton = ({ icon: Icon, command, arg, label, isActive }: any) => (
+  // --- Product Carousel Logic ---
+
+  const handleAddProduct = async () => {
+      const file = productFileInputRef.current?.files?.[0];
+      if (!file || !currentProduct.title || !currentProduct.price) {
+          alert("Please fill in all fields and select an image.");
+          return;
+      }
+      
+      setIsUploadingProduct(true);
+      try {
+          const imageUrl = await FileUploadService.uploadImage(file);
+          const newItem: ProductItem = {
+              id: Math.random().toString(36).substr(2, 9),
+              title: currentProduct.title,
+              price: currentProduct.price,
+              image: imageUrl
+          };
+          setProductItems([...productItems, newItem]);
+          setCurrentProduct({ title: '', price: '' });
+          if (productFileInputRef.current) productFileInputRef.current.value = '';
+      } catch (err) {
+          console.error(err);
+      } finally {
+          setIsUploadingProduct(false);
+      }
+  };
+
+  const removeProductItem = (id: string) => {
+      setProductItems(productItems.filter(p => p.id !== id));
+  };
+
+  const insertProductCarousel = () => {
+      if (productItems.length === 0) return;
+
+      const itemsHtml = productItems.map(item => `
+        <div class="min-w-[260px] md:min-w-[300px] snap-center group/card perspective-1000">
+             <div class="relative bg-white rounded-xl p-3 shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
+                 <div class="aspect-[4/5] bg-gray-50 rounded-lg mb-4 overflow-hidden relative">
+                      <img src="${item.image}" class="w-full h-full object-cover mix-blend-multiply" />
+                      <div class="absolute inset-0 bg-black/5 opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                      <button class="absolute bottom-3 left-1/2 -translate-x-1/2 w-[90%] bg-luxe-black text-white text-xs py-2 uppercase font-bold tracking-widest opacity-0 group-hover/card:opacity-100 translate-y-2 group-hover/card:translate-y-0 transition-all duration-300 shadow-lg rounded-sm">
+                          Add to Bag
+                      </button>
+                      <button class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm opacity-0 group-hover/card:opacity-100 transition-opacity">
+                         ♥
+                      </button>
+                 </div>
+                 <div class="text-center px-2 pb-2">
+                     <h4 class="font-serif text-lg text-luxe-black mb-1 truncate">${item.title}</h4>
+                     <p class="font-bold text-luxe-gold">$${item.price}</p>
+                 </div>
+             </div>
+        </div>
+      `).join('');
+
+      const carouselHtml = `
+      <div class="my-12 py-8 bg-luxe-cream/30 border-y border-luxe-gold/10 relative" contenteditable="false">
+          <div class="text-center mb-6">
+             <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-luxe-gold">Shop The Look</span>
+             <h3 class="font-serif text-2xl text-luxe-black">Featured Products</h3>
+          </div>
+          <div class="flex overflow-x-auto gap-6 px-6 pb-6 snap-x snap-mandatory no-scrollbar">
+              ${itemsHtml}
+          </div>
+      </div><p><br/></p>`;
+
+      contentRef.current?.focus();
+      document.execCommand('insertHTML', false, carouselHtml);
+      handleInput();
+      
+      // Reset & Close
+      setProductItems([]);
+      setIsProductModalOpen(false);
+  };
+
+  const ToolbarButton = ({ icon: Icon, command, arg, label, isActive, onClick }: any) => (
     <button
       type="button"
       onClick={(e) => {
         e.preventDefault();
-        execCommand(command, arg);
+        if (onClick) onClick();
+        else execCommand(command, arg);
       }}
-      className={`p-2 rounded transition-all duration-200 flex items-center justify-center
+      className={`p-2 rounded transition-all duration-200 flex items-center justify-center relative group
         ${isActive 
             ? 'bg-luxe-black text-white shadow-inner' 
             : 'text-slate-500 hover:text-luxe-gold hover:bg-gray-100'
@@ -120,12 +248,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       title={label}
     >
       <Icon size={18} />
+      {/* Tooltip */}
+      <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+          {label}
+      </span>
     </button>
   );
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white focus-within:border-luxe-gold focus-within:ring-1 focus-within:ring-luxe-gold transition-all shadow-sm">
-      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
+    <div className="border border-gray-200 rounded-lg bg-white focus-within:border-luxe-gold focus-within:ring-1 focus-within:ring-luxe-gold transition-all shadow-sm relative z-0">
+      
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm sticky top-0 z-40 rounded-t-lg">
         <ToolbarButton icon={Heading1} command="formatBlock" arg="H2" label="Heading Large" isActive={activeFormats.formatBlockH2} />
         <ToolbarButton icon={Heading2} command="formatBlock" arg="H3" label="Heading Medium" isActive={activeFormats.formatBlockH3} />
         <div className="w-[1px] h-5 bg-gray-300 mx-1"></div>
@@ -140,50 +274,117 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         
         <div className="w-[1px] h-5 bg-gray-300 mx-1"></div>
         
-        {/* Image Tools */}
-        <button type="button" onClick={() => triggerImageUpload('image')} className="p-2 text-slate-500 hover:text-luxe-gold hover:bg-gray-100 rounded" title="Large Image">
-            <Maximize size={18} />
-        </button>
-        <button type="button" onClick={() => triggerImageUpload('polaroid')} className="p-2 text-slate-500 hover:text-luxe-gold hover:bg-gray-100 rounded" title="Polaroid Style">
-            <Frame size={18} />
-        </button>
-        <button type="button" onClick={() => triggerImageUpload('gallery')} className="p-2 text-slate-500 hover:text-luxe-gold hover:bg-gray-100 rounded" title="Image Gallery">
-            <LayoutGrid size={18} />
-        </button>
+        {/* Media Tools */}
+        <ToolbarButton icon={Maximize} onClick={() => triggerImageUpload('image')} label="Large Image" />
+        <ToolbarButton icon={Frame} onClick={() => triggerImageUpload('polaroid')} label="Polaroid Style" />
+        <ToolbarButton icon={LayoutGrid} onClick={() => triggerImageUpload('gallery')} label="Image Gallery" />
+        <ToolbarButton icon={Film} onClick={() => triggerImageUpload('image-carousel')} label="Image Carousel" />
+        <ToolbarButton icon={ShoppingBag} onClick={() => setIsProductModalOpen(true)} label="Product Carousel" isActive={isProductModalOpen} />
 
-        {/* Hidden File Input */}
+        {/* Hidden File Input for basic images */}
         <input 
             type="file" 
             ref={fileInputRef} 
             className="hidden" 
             accept="image/*" 
-            multiple={insertType === 'gallery'}
+            multiple={insertType === 'gallery' || insertType === 'image-carousel'}
             onChange={handleFileUpload}
         />
       </div>
       
+      {/* Editor Content Area */}
       <div
         ref={contentRef}
         contentEditable
         onInput={handleInput}
         onKeyUp={checkFormats}
         onMouseUp={checkFormats}
-        className="min-h-[400px] p-8 focus:outline-none prose prose-slate max-w-none 
+        onClick={checkFormats}
+        className="min-h-[500px] p-8 focus:outline-none prose prose-slate max-w-none 
           prose-headings:font-serif prose-headings:font-normal prose-headings:text-luxe-black
-          prose-h2:text-3xl prose-h2:mt-8 prose-h2:mb-4
-          prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-h3:uppercase prose-h3:tracking-wide
-          prose-p:leading-relaxed prose-p:text-slate-600 prose-p:mb-4
-          prose-blockquote:border-l-4 prose-blockquote:border-luxe-gold prose-blockquote:italic prose-blockquote:pl-6 prose-blockquote:my-8 prose-blockquote:text-xl prose-blockquote:text-luxe-charcoal
+          prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6
+          prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:uppercase prose-h3:tracking-wide
+          prose-p:leading-relaxed prose-p:text-slate-600 prose-p:mb-6
+          prose-blockquote:border-l-4 prose-blockquote:border-luxe-gold prose-blockquote:italic prose-blockquote:pl-6 prose-blockquote:my-10 prose-blockquote:text-xl prose-blockquote:text-luxe-charcoal
           prose-img:rounded-lg prose-img:shadow-md
           selection:bg-luxe-gold/20 selection:text-black"
         data-placeholder={placeholder}
       ></div>
       
-      {/* Visual Placeholder Overlay */}
       {!value && (
-         <div className="absolute top-[100px] left-8 text-gray-300 pointer-events-none font-serif italic text-lg select-none">
+         <div className="absolute top-[110px] left-8 text-gray-300 pointer-events-none font-serif italic text-lg select-none">
             {placeholder}
          </div>
+      )}
+
+      {/* --- Product Carousel Modal --- */}
+      {isProductModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+               <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                  <h3 className="font-serif text-2xl">Insert Product Carousel</h3>
+                  <button onClick={() => setIsProductModalOpen(false)} className="text-gray-400 hover:text-black"><X size={24} /></button>
+               </div>
+               
+               <div className="p-6 overflow-y-auto flex-1">
+                   {/* Add New Product Form */}
+                   <div className="bg-luxe-cream/50 p-4 rounded-lg border border-luxe-gold/10 mb-6">
+                       <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-luxe-gold">Add New Item</h4>
+                       <div className="flex gap-4 items-end">
+                           <div className="w-20 h-20 bg-white border border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-luxe-gold relative overflow-hidden shrink-0">
+                               <input type="file" ref={productFileInputRef} className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                               <Plus size={20} className="text-gray-400" />
+                           </div>
+                           <div className="flex-1 space-y-2">
+                               <input 
+                                  type="text" 
+                                  placeholder="Product Title" 
+                                  className="w-full text-sm p-2 border border-gray-200 rounded focus:border-luxe-gold focus:outline-none"
+                                  value={currentProduct.title}
+                                  onChange={e => setCurrentProduct({...currentProduct, title: e.target.value})}
+                               />
+                               <input 
+                                  type="number" 
+                                  placeholder="Price ($)" 
+                                  className="w-full text-sm p-2 border border-gray-200 rounded focus:border-luxe-gold focus:outline-none"
+                                  value={currentProduct.price}
+                                  onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})}
+                               />
+                           </div>
+                           <Button variant="primary" onClick={handleAddProduct} disabled={isUploadingProduct} className="py-2 px-4 text-xs">
+                               {isUploadingProduct ? '...' : 'Add'}
+                           </Button>
+                       </div>
+                   </div>
+
+                   {/* List of Added Items */}
+                   <div className="space-y-2">
+                       {productItems.length === 0 ? (
+                           <p className="text-center text-gray-400 text-sm py-8 italic">No products added yet.</p>
+                       ) : (
+                           productItems.map((item, idx) => (
+                               <div key={item.id} className="flex items-center gap-4 p-2 bg-white border border-gray-100 rounded shadow-sm">
+                                   <span className="text-gray-300 font-bold w-6 text-center">{idx + 1}</span>
+                                   <img src={item.image} className="w-10 h-10 object-cover rounded" />
+                                   <div className="flex-1">
+                                       <p className="text-sm font-bold">{item.title}</p>
+                                       <p className="text-xs text-luxe-gold">${item.price}</p>
+                                   </div>
+                                   <button onClick={() => removeProductItem(item.id)} className="text-gray-400 hover:text-red-500 p-2"><Trash2 size={16}/></button>
+                               </div>
+                           ))
+                       )}
+                   </div>
+               </div>
+
+               <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-4">
+                   <Button variant="outline" onClick={() => setIsProductModalOpen(false)}>Cancel</Button>
+                   <Button variant="primary" onClick={insertProductCarousel} disabled={productItems.length === 0}>
+                       Insert Carousel ({productItems.length})
+                   </Button>
+               </div>
+           </div>
+        </div>
       )}
     </div>
   );
