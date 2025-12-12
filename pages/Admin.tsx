@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { Category, Article } from '../types';
 import { FileUploadService } from '../services/fileUploadService';
-import { PenTool, Layout, Image as ImageIcon, Sparkles, Upload, CheckCircle, AlertCircle, Eye, X } from 'lucide-react';
+import { PenTool, Layout, Image as ImageIcon, Sparkles, Upload, CheckCircle, AlertCircle, Eye, X, Save, FileText } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,12 +27,14 @@ export const Admin: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
   const { addArticle } = useBlog();
 
   const { 
     register, 
     handleSubmit, 
     setValue, 
+    getValues,
     watch, 
     reset,
     control,
@@ -49,11 +51,40 @@ export const Admin: React.FC = () => {
     }
   });
 
+  // Check for drafts on mount and tab change
+  useEffect(() => {
+      const draft = localStorage.getItem('article_draft');
+      setHasDraft(!!draft);
+  }, [activeTab]);
+
   // Watch values for preview or logic
   const watchedValues = watch();
   const watchedImageUrl = watchedValues.imageUrl;
   const watchedTitle = watchedValues.title;
   const watchedCategory = watchedValues.category;
+
+  // Handle Save Draft
+  const handleSaveDraft = () => {
+      const currentValues = getValues();
+      localStorage.setItem('article_draft', JSON.stringify(currentValues));
+      setHasDraft(true);
+      alert("Draft saved successfully! You can resume editing anytime.");
+  };
+
+  // Handle Load Draft
+  const handleLoadDraft = () => {
+      const draft = localStorage.getItem('article_draft');
+      if (draft) {
+          try {
+              const parsed = JSON.parse(draft);
+              reset(parsed);
+              alert("Draft loaded.");
+          } catch (e) {
+              console.error("Failed to parse draft", e);
+              alert("Corrupted draft found.");
+          }
+      }
+  };
 
   // Handle File Upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,9 +141,6 @@ export const Admin: React.FC = () => {
       });
 
       const text = response.text;
-      // Heuristic splitting might need adjustment depending on actual output
-      // Assuming AI returns excerpt first then HTML or mixed. 
-      // For safety, let's just dump text into content if we can't parse easily
       
       setValue("excerpt", "AI Generated Excerpt: " + text.slice(0, 100) + "...", { shouldValidate: true });
       setValue("content", text, { shouldValidate: true });
@@ -137,6 +165,10 @@ export const Admin: React.FC = () => {
       // Add to global store
       addArticle(newArticle);
       
+      // Clear draft on successful publish
+      localStorage.removeItem('article_draft');
+      setHasDraft(false);
+
       alert('Article published successfully!');
       reset(); // Clear form
       setActiveTab('dashboard'); // Go back to dashboard
@@ -191,7 +223,18 @@ export const Admin: React.FC = () => {
         )}
 
         {activeTab === 'create' && (
-            <div className="bg-white p-8 md:p-12 shadow-sm border border-gray-100 rounded-lg max-w-4xl mx-auto animate-fade-in">
+            <div className="bg-white p-8 md:p-12 shadow-sm border border-gray-100 rounded-lg max-w-4xl mx-auto animate-fade-in relative">
+                
+                {/* Draft Notification / Loader */}
+                {hasDraft && (
+                    <div className="absolute top-8 right-12 flex items-center gap-2">
+                        <span className="text-xs text-slate-400 italic">Draft available</span>
+                        <Button variant="outline" onClick={handleLoadDraft} className="py-1 px-3 text-xs h-auto">
+                            <FileText size={14} className="mr-1" /> Load Draft
+                        </Button>
+                    </div>
+                )}
+
                 <h2 className="text-2xl font-serif mb-8 text-center">Compose New Story</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -318,13 +361,19 @@ export const Admin: React.FC = () => {
                         {errors.content && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.content.message}</p>}
                     </div>
 
-                    <div className="flex justify-end pt-6 border-t border-gray-100">
-                        <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="mr-4">
-                            <Eye size={18} className="mr-2" /> Preview
+                    <div className="flex justify-between pt-6 border-t border-gray-100">
+                        <Button type="button" variant="outline" onClick={handleSaveDraft} className="border-gray-300 text-gray-500 hover:text-luxe-black hover:border-luxe-black">
+                            <Save size={18} className="mr-2" /> Save Draft
                         </Button>
-                        <Button type="submit" variant="primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Publishing...' : 'Publish Editorial'}
-                        </Button>
+
+                        <div className="flex gap-4">
+                            <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>
+                                <Eye size={18} className="mr-2" /> Preview
+                            </Button>
+                            <Button type="submit" variant="primary" disabled={isSubmitting}>
+                                {isSubmitting ? 'Publishing...' : 'Publish Editorial'}
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </div>

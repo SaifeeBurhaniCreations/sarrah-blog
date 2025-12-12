@@ -85,11 +85,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
   const triggerImageUpload = (type: 'image' | 'gallery' | 'polaroid' | 'image-carousel') => {
       setInsertType(type);
-      if (fileInputRef.current) {
-          // Reset value to allow re-selecting same file
-          fileInputRef.current.value = '';
-          fileInputRef.current.click();
-      }
+      // Wait for React to update the 'multiple' attribute on the input based on the new insertType state
+      setTimeout(() => {
+          if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+              fileInputRef.current.click();
+          }
+      }, 0);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,15 +208,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       if (productItems.length === 0) return;
 
       const itemsHtml = productItems.map(item => `
-        <div class="min-w-[280px] md:min-w-[340px] snap-center group perspective-1000 pl-4 h-full">
-             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100 h-full flex flex-col">
+        <div class="min-w-[280px] max-w-[300px] snap-center group perspective-1000 pl-4 h-full flex flex-col">
+             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100 flex-1 flex flex-col">
                  
                  <!-- Badge with improved visibility -->
-                 <div class="absolute top-6 left-6 z-[30] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-sm shadow-sm">
-                     <span class="text-[10px] font-bold uppercase tracking-widest text-luxe-black">Editor's Pick</span>
+                 <div class="absolute top-4 left-4 z-[30] bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-sm shadow-sm border border-gray-100">
+                     <span class="text-[10px] font-bold uppercase tracking-widest text-luxe-black whitespace-nowrap">Editor's Pick</span>
                  </div>
 
-                 <div class="aspect-[4/5] bg-gray-50 rounded-xl mb-6 overflow-hidden relative flex-shrink-0">
+                 <div class="aspect-[4/5] bg-gray-50 rounded-xl mb-4 overflow-hidden relative flex-shrink-0 w-full">
                       <img src="${item.image}" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 hover:scale-110" />
                       
                       <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] opacity-0 hover:opacity-100 translate-y-4 hover:translate-y-0 transition-all duration-300">
@@ -224,8 +226,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
                       </div>
                  </div>
                  
-                 <div class="text-center px-2 pb-2 flex-grow flex flex-col justify-end">
-                     <h4 class="font-serif text-xl text-luxe-black mb-1 truncate hover:text-luxe-gold transition-colors">${item.title}</h4>
+                 <div class="text-center px-2 flex-grow flex flex-col justify-end">
+                     <h4 class="font-serif text-lg text-luxe-black mb-1 truncate w-full hover:text-luxe-gold transition-colors" title="${item.title}">${item.title}</h4>
                      
                      <!-- Star Rating -->
                      <div class="flex justify-center gap-1 my-2">
