@@ -1,6 +1,7 @@
 import React from 'react';
 import { Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Logo } from './Logo';
 
 export const Footer: React.FC = () => {
   return (
@@ -8,11 +9,11 @@ export const Footer: React.FC = () => {
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
         
         <div className="space-y-6">
-          <h2 className="text-3xl font-serif font-bold">Burhani.</h2>
-          <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+          <Logo variant="light" />
+          <p className="text-gray-400 text-sm leading-relaxed max-w-xs mt-4">
             A digital destination for the fashion-forward. We curate the latest in beauty, style, and culture for the modern aesthete.
           </p>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 pt-4">
              <Instagram size={20} className="hover:text-luxe-gold cursor-pointer transition-colors" />
              <Twitter size={20} className="hover:text-luxe-gold cursor-pointer transition-colors" />
              <Facebook size={20} className="hover:text-luxe-gold cursor-pointer transition-colors" />
