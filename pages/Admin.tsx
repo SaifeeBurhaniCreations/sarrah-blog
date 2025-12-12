@@ -319,7 +319,7 @@ export const Admin: React.FC = () => {
                     </div>
 
                     <div className="flex justify-end pt-6 border-t border-gray-100">
-                        <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="mr-4">
+                        <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="mr-4 flex">
                             <Eye size={18} className="mr-2" /> Preview
                         </Button>
                         <Button type="submit" variant="primary" disabled={isSubmitting}>
