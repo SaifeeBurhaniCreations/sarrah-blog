@@ -3,23 +3,19 @@ import { Hero } from '../components/Hero';
 import { ArticleGrid } from '../components/ArticleGrid';
 import { FeaturedProducts } from '../components/FeaturedProducts';
 import { BrandTicker } from '../components/BrandTicker';
-import { BlogService } from '../services/blogService';
 import { ProductService } from '../services/productService';
-import { Article, Product } from '../types';
+import { Product } from '../types';
+import { useBlog } from '../context/BlogContext';
 
 export const Home: React.FC = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const { articles } = useBlog();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [fetchedArticles, fetchedProducts] = await Promise.all([
-          BlogService.getArticles(),
-          ProductService.getProducts()
-        ]);
-        setArticles(fetchedArticles);
+        const fetchedProducts = await ProductService.getProducts();
         setProducts(fetchedProducts);
       } catch (error) {
         console.error("Failed to load content", error);
@@ -35,7 +31,7 @@ export const Home: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-luxe-cream">
         <div className="animate-pulse flex flex-col items-center">
            <div className="h-16 w-16 border-4 border-luxe-gold border-t-transparent rounded-full animate-spin mb-6"></div>
-           <span className="font-serif text-2xl text-luxe-black tracking-[0.3em] uppercase">Lumière</span>
+           <span className="font-serif text-2xl text-luxe-black tracking-[0.3em] uppercase">Burhani</span>
         </div>
       </div>
     );
@@ -75,7 +71,7 @@ export const Home: React.FC = () => {
          
          <div className="container mx-auto px-6 relative z-10 flex flex-col items-center text-center">
              <div className="w-20 h-20 border border-white/30 rounded-full flex items-center justify-center mb-8 backdrop-blur-md">
-                 <span className="font-serif text-3xl italic">L</span>
+                 <span className="font-serif text-3xl italic">B</span>
              </div>
              <h3 className="font-serif text-5xl md:text-7xl mb-6">The Inner Circle</h3>
              <p className="text-gray-300 max-w-xl mb-10 text-lg leading-relaxed">

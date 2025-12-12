@@ -1,11 +1,12 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MOCK_ARTICLES } from '../constants';
 import { ArrowLeft, Share2, Bookmark } from 'lucide-react';
+import { useBlog } from '../context/BlogContext';
 
 export const ArticleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const article = MOCK_ARTICLES.find(a => a.id === id);
+  const { getArticleById } = useBlog();
+  const article = getArticleById(id || '');
 
   if (!article) {
     return <div className="pt-32 text-center">Article not found.</div>;
@@ -47,32 +48,11 @@ export const ArticleDetail: React.FC = () => {
                     {article.excerpt}
                 </p>
 
-                <div className="prose prose-lg prose-slate font-serif max-w-none first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left first-letter:text-luxe-black">
-                     {/* Mocking rich content */}
-                     <p>
-                        It was a Tuesday afternoon in Paris when the concept first took shape. The air was crisp, the light hitting the Seine in that specific way that artists have tried to capture for centuries. Fashion, at its core, is not just about clothing—it is about capturing a moment, a feeling, an atmosphere.
-                     </p>
-                     <p>
-                        In recent collections, we have seen a dramatic shift away from the minimalist utilitarianism that defined the post-pandemic era. Designers are once again embracing <strong>opulence, texture, and structural complexity</strong>.
-                     </p>
-                     <figure className="my-12">
-                         <img src={`https://picsum.photos/seed/${article.id}_detail/1200/600`} alt="Detail shot" className="w-full rounded-lg shadow-xl" />
-                         <figcaption className="text-center text-xs text-gray-500 mt-2 uppercase tracking-widest">Fig 1. Structural detail from the collection</figcaption>
-                     </figure>
-                     <h3>The Return of Craftsmanship</h3>
-                     <p>
-                        Hand-stitched embroidery, custom-loomed jacquards, and bespoke tailoring are no longer the exclusive purview of Haute Couture. Ready-to-wear lines are incorporating these elements, signaling a consumer desire for longevity and artistry over fast fashion disposability.
-                     </p>
-                     <p>
-                         "We want pieces that tell a story," says one prominent creative director. "Clothes that you can pass down, not throw away."
-                     </p>
-                     <div className="bg-luxe-cream p-8 my-10 border-t border-b border-luxe-gold/20 text-center">
-                         <p className="font-sans text-sm tracking-widest uppercase mb-4 text-slate-500">Key Takeaway</p>
-                         <p className="text-2xl italic font-serif">"True luxury is silence in a noisy world."</p>
-                     </div>
-                     <p>
-                         As we look towards the next season, expect to see a further blurring of the lines between art and attire. The runway is no longer just a display of merchandise; it is a gallery of kinetic sculpture.
-                     </p>
+                {/* Render HTML Content from Rich Text Editor */}
+                <div 
+                    className="prose prose-lg prose-slate font-serif max-w-none first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left first-letter:text-luxe-black"
+                    dangerouslySetInnerHTML={{ __html: article.content }}
+                >
                 </div>
 
                 {/* Footer Actions */}
@@ -87,8 +67,8 @@ export const ArticleDetail: React.FC = () => {
                     </div>
                     <div className="flex gap-2">
                         <span className="text-xs text-slate-400">Tags:</span>
-                        <span className="text-xs font-bold text-luxe-black">#Fashion</span>
-                        <span className="text-xs font-bold text-luxe-black">#Trends</span>
+                        <span className="text-xs font-bold text-luxe-black">#{article.category}</span>
+                        <span className="text-xs font-bold text-luxe-black">#Burhani</span>
                     </div>
                 </div>
            </div>

@@ -8,7 +8,7 @@ export const Footer: React.FC = () => {
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
         
         <div className="space-y-6">
-          <h2 className="text-3xl font-serif font-bold">Lumière.</h2>
+          <h2 className="text-3xl font-serif font-bold">Burhani.</h2>
           <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
             A digital destination for the fashion-forward. We curate the latest in beauty, style, and culture for the modern aesthete.
           </p>
@@ -55,7 +55,7 @@ export const Footer: React.FC = () => {
 
       </div>
       <div className="container mx-auto px-6 mt-16 pt-8 border-t border-gray-800 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-        <p>&copy; 2024 Lumière & Vogue. All rights reserved.</p>
+        <p>&copy; 2024 Burhani Creations. All rights reserved.</p>
         <div className="space-x-6 mt-4 md:mt-0">
           <span className="cursor-pointer hover:text-white">Privacy Policy</span>
           <span className="cursor-pointer hover:text-white">Terms of Service</span>
