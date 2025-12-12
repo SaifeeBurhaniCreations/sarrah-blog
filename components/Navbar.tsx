@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag, Search } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { useShop } from '../context/ShopContext';
+import { Logo } from './Logo';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -24,7 +25,7 @@ export const Navbar: React.FC = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
       ${isScrolled 
-        ? 'bg-white/70 backdrop-blur-xl py-3 shadow-sm border-b border-luxe-gold/20' 
+        ? 'bg-white/90 backdrop-blur-xl py-3 shadow-sm border-b border-luxe-gold/20' 
         : 'bg-transparent py-6 border-b border-transparent'}`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -35,12 +36,8 @@ export const Navbar: React.FC = () => {
         </button>
 
         {/* Logo */}
-        <Link to="/" className="group relative z-50 flex items-center gap-2">
-           <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tighter text-luxe-black group-hover:opacity-80 transition-opacity">
-            Burhani<span className="text-luxe-gold">.</span>
-            <span className="hidden md:inline font-sans font-light text-sm tracking-widest ml-1 text-slate-600">Creations</span>
-           </h1>
-           {/* Mobile Short Logo fallback handled by text size, but keeping structure clean */}
+        <Link to="/" className="group relative z-50">
+           <Logo />
         </Link>
 
         {/* Desktop Nav */}
@@ -49,13 +46,11 @@ export const Navbar: React.FC = () => {
             <Link 
               key={item.path} 
               to={item.path}
-              className={`text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative py-2
+              className={`text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative py-2 group
               ${location.pathname === item.path ? 'text-luxe-gold' : 'text-luxe-charcoal hover:text-luxe-gold'}`}
             >
               {item.label}
-              {location.pathname === item.path && (
-                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-luxe-gold"></span>
-              )}
+              <span className={`absolute bottom-0 left-0 h-[1px] bg-luxe-gold transition-all duration-300 ${location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
             </Link>
           ))}
         </nav>
@@ -87,6 +82,10 @@ export const Navbar: React.FC = () => {
          {/* Decorative circle in mobile menu */}
          <div className="absolute top-20 right-20 w-64 h-64 bg-luxe-rose/20 rounded-full blur-3xl"></div>
          
+         <Link to="/" onClick={() => setIsMenuOpen(false)} className="mb-8">
+            <Logo />
+         </Link>
+
          {NAV_ITEMS.map((item) => (
             <Link 
               key={item.path} 
