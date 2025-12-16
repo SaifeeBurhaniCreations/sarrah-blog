@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -15,6 +15,8 @@ import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { Terms } from './pages/Terms';
+import { Careers } from './pages/Careers';
+import { Sustainability } from './pages/Sustainability';
 import { ShopProvider } from './context/ShopContext';
 import { BlogProvider } from './context/BlogContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -23,10 +25,12 @@ import { CartDrawer } from './components/CartDrawer';
 import { SearchOverlay } from './components/SearchOverlay';
 
 const ScrollToTop = () => {
-    const { pathname } = window.location;
-    React.useEffect(() => {
+    const { pathname } = useLocation();
+    
+    React.useLayoutEffect(() => {
         window.scrollTo(0, 0);
     }, [pathname]);
+
     return null;
 }
 
@@ -64,6 +68,8 @@ const App: React.FC = () => {
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="/terms-conditions" element={<Terms />} />
+                    <Route path="/careers" element={<Careers />} />
+                    <Route path="/sustainability" element={<Sustainability />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/admin" element={
                         <ProtectedRoute>
