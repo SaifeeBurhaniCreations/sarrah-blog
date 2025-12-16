@@ -3,6 +3,7 @@ import { MOCK_PRODUCTS } from '../constants';
 import { Category } from '../types';
 import { Droplets, Sun, Sparkles } from 'lucide-react';
 import { useBlog } from '../context/BlogContext';
+import { ImageWithSkeleton } from '../components/ui/ImageWithSkeleton';
 
 export const Beauty: React.FC = () => {
   const { articles } = useBlog();
@@ -38,9 +39,10 @@ export const Beauty: React.FC = () => {
             </div>
             <div className="relative">
                 <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-full transform scale-90 translate-y-4"></div>
-                <img 
+                <ImageWithSkeleton 
                     src="https://picsum.photos/seed/beauty_hero/800/800" 
                     className="relative z-10 rounded-full w-[400px] h-[400px] md:w-[500px] md:h-[500px] object-cover mx-auto shadow-2xl ring-8 ring-white/50"
+                    containerClassName="rounded-full w-[400px] h-[400px] md:w-[500px] md:h-[500px] mx-auto bg-transparent"
                 />
                 {/* Floating Product Cards */}
                 <div className="absolute top-10 left-0 bg-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-float">
@@ -72,7 +74,7 @@ export const Beauty: React.FC = () => {
             {MOCK_PRODUCTS.map((product) => (
                 <div key={product.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 group border border-rose-50">
                     <div className="relative aspect-square mb-6 overflow-hidden rounded-xl bg-gray-50">
-                        <img src={product.imageUrl} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-500"/>
+                        <ImageWithSkeleton src={product.imageUrl} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-500" containerClassName="w-full h-full"/>
                         <button className="absolute bottom-3 right-3 bg-black text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">+</button>
                     </div>
                     <div className="text-center">
@@ -97,7 +99,7 @@ export const Beauty: React.FC = () => {
                 {beautyArticles.map((article, idx) => (
                     <article key={article.id} className={`flex flex-col md:flex-row gap-8 items-center ${idx % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
                         <div className="w-full md:w-1/2 overflow-hidden rounded-lg shadow-md">
-                            <img src={article.imageUrl} className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"/>
+                            <ImageWithSkeleton src={article.imageUrl} className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500" containerClassName="w-full h-64"/>
                         </div>
                         <div className="w-full md:w-1/2 space-y-4">
                             <span className="text-xs font-bold text-luxe-rose-dark border border-luxe-rose-dark px-2 py-1 rounded-full uppercase">{article.category}</span>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Article } from '../types';
 import { ArrowUpRight, Clock, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ImageWithSkeleton } from './ui/ImageWithSkeleton';
 
 interface ArticleGridProps {
   articles: Article[];
@@ -47,10 +48,11 @@ export const ArticleGrid: React.FC<ArticleGridProps> = ({ articles }) => {
                     
                     {/* Main Card */}
                     <div className="relative h-full w-full overflow-hidden rounded-xl shadow-lg group-hover:shadow-2xl transition-shadow duration-500 bg-gray-100">
-                        <img 
+                        <ImageWithSkeleton 
                           src={article.imageUrl} 
                           alt={article.title} 
                           className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+                          containerClassName="w-full h-full"
                         />
                         
                         {/* Gradient Overlay for Text Visibility */}

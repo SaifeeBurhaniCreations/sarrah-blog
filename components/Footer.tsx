@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
 
       </div>
       <div className="container mx-auto px-6 mt-16 pt-8 border-t border-gray-800 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-        <p>&copy; 2024 Burhani Creations. All rights reserved.</p>
+        <p>&copy; 2024 Burhani Creates. All rights reserved.</p>
         <div className="space-x-6 mt-4 md:mt-0">
           <Link to="/privacy-policy" className="cursor-pointer hover:text-white">Privacy Policy</Link>
           <Link to="/terms-conditions" className="cursor-pointer hover:text-white">Terms of Service</Link>

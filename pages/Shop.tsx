@@ -5,9 +5,12 @@ import { useShop } from '../context/ShopContext';
 import { ShoppingCart, Filter, X, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProductCategory } from '../types';
+import { ImageWithSkeleton } from '../components/ui/ImageWithSkeleton';
+import { Skeleton } from '../components/ui/Skeleton';
 
 export const Shop: React.FC = () => {
   const { addToCart } = useShop();
+  const [loading, setLoading] = useState(true);
   
   // Sidebar State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,6 +26,13 @@ export const Shop: React.FC = () => {
       category: true,
       price: true
   });
+
+  // Simulating loading state for demo purposes
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [selectedBrands, selectedCategories]); // Re-trigger load on filter change for effect
 
   const toggleSection = (section: keyof typeof expandedSections) => {
       setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -187,19 +197,32 @@ export const Shop: React.FC = () => {
          {/* Product Grid */}
          <div className="flex-1">
             <div className="mb-6 flex justify-between items-center">
-                <p className="text-sm text-slate-500">Showing <span className="font-bold text-luxe-black">{filteredProducts.length}</span> results</p>
+                <p className="text-sm text-slate-500">Showing <span className="font-bold text-luxe-black">{loading ? '...' : filteredProducts.length}</span> results</p>
             </div>
 
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+                // Skeleton Grid
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                     {Array.from({ length: 6 }).map((_, i) => (
+                         <div key={i} className="flex flex-col">
+                             <Skeleton className="aspect-[4/5] rounded-lg mb-4" />
+                             <Skeleton className="h-3 w-20 mb-2" />
+                             <Skeleton className="h-6 w-3/4 mb-2" />
+                             <Skeleton className="h-5 w-16" />
+                         </div>
+                     ))}
+                </div>
+            ) : filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredProducts.map(product => (
                         <div key={product.id} className="group flex flex-col">
                             <div className="relative overflow-hidden mb-4 bg-gray-50 aspect-[4/5] rounded-lg">
                                 <Link to={`/products/${product.id}`}>
-                                    <img 
+                                    <ImageWithSkeleton 
                                         src={product.imageUrl} 
                                         alt={product.name}
                                         className="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-110 cursor-pointer"
+                                        containerClassName="w-full h-full"
                                     />
                                 </Link>
                                 <button 

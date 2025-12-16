@@ -23,7 +23,7 @@ export const PrivacyPolicy: React.FC = () => {
                 <div className="relative">
                     <h3 className="text-2xl font-serif text-luxe-black mb-6">Introduction</h3>
                     <p className="text-slate-600 leading-relaxed text-lg">
-                        Welcome to Burhani Creations ("we", "our", or "us"). We are committed to protecting your personal information and your right to privacy. This policy describes how we collect, use, and share your information when you visit our website. By using our services, you consent to the practices described in this policy.
+                        Welcome to Burhani Creates ("we", "our", or "us"). We are committed to protecting your personal information and your right to privacy. This policy describes how we collect, use, and share your information when you visit our website. By using our services, you consent to the practices described in this policy.
                     </p>
                 </div>
             </section>
@@ -93,10 +93,10 @@ export const PrivacyPolicy: React.FC = () => {
                  <div className="relative">
                     <h3 className="text-2xl font-serif text-luxe-black mb-6">Contact Us</h3>
                     <p className="text-slate-600 leading-relaxed mb-8">
-                        If you have questions or comments about this policy, you may email us at privacy@burhanicreations.com or by post to:
+                        If you have questions or comments about this policy, you may email us at privacy@burhanicreates.com or by post to:
                     </p>
                     <div className="flex flex-col md:flex-row gap-6">
-                        <a href="mailto:privacy@burhanicreations.com" className="flex items-center gap-3 px-6 py-4 bg-luxe-black text-white rounded-lg hover:bg-luxe-gold hover:text-luxe-black transition-colors w-max">
+                        <a href="mailto:privacy@burhanicreates.com" className="flex items-center gap-3 px-6 py-4 bg-luxe-black text-white rounded-lg hover:bg-luxe-gold hover:text-luxe-black transition-colors w-max">
                             <Mail size={18} /> 
                             <span className="text-sm font-bold uppercase tracking-widest">Email Privacy Team</span>
                         </a>

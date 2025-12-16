@@ -6,7 +6,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button: React.FC<ButtonProps> = ({ variant = 'primary', className = '', children, ...props }) => {
-  const baseStyle = "px-8 py-3 transition-all duration-300 ease-out font-sans tracking-wide text-sm uppercase font-semibold";
+  const baseStyle = "px-8 py-3 transition-all duration-300 ease-out font-sans tracking-wide text-sm uppercase font-semibold flex items-center justify-center gap-2";
   
   const variants = {
     primary: "bg-luxe-black text-white hover:bg-luxe-gold hover:text-black hover:shadow-lg border border-transparent",

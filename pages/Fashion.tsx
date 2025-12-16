@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { useBlog } from '../context/BlogContext';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
+import { ImageWithSkeleton } from '../components/ui/ImageWithSkeleton';
 
 const TRENDS = [
     { id: 1, title: "Liquid Metal", desc: "High-shine fabrics taking over evening wear.", color: "bg-gray-300", image: "https://picsum.photos/seed/trend1/400/500" },
@@ -48,7 +49,7 @@ export const Fashion: React.FC = () => {
       {/* Editorial Header */}
       <header className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-luxe-charcoal text-white">
           <div className="absolute inset-0 opacity-40">
-              <img src="https://picsum.photos/seed/fashion_header_new/1920/1080" className="w-full h-full object-cover grayscale" />
+              <ImageWithSkeleton src="https://picsum.photos/seed/fashion_header_new/1920/1080" className="w-full h-full object-cover grayscale" containerClassName="w-full h-full"/>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
           
@@ -91,10 +92,11 @@ export const Fashion: React.FC = () => {
                   {editorialGrid.map((article) => (
                       <Link to={`/articles/${article.id}`} key={article.id} className="group cursor-pointer block">
                           <div className="relative overflow-hidden mb-6 aspect-[3/4] rounded-sm bg-gray-100">
-                              <img 
+                              <ImageWithSkeleton 
                                 src={article.imageUrl} 
                                 alt={article.title}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" 
+                                containerClassName="w-full h-full"
                               />
                               <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-luxe-black">
                                   {article.category}
@@ -139,7 +141,7 @@ export const Fashion: React.FC = () => {
                           <div key={trend.id} className="w-[300px] md:w-[400px] flex-shrink-0 group perspective-1000">
                               <div className="relative bg-white p-4 shadow-sm group-hover:shadow-2xl transition-all duration-500 transform group-hover:-translate-y-2 group-hover:rotate-1 border border-gray-100">
                                   <div className="h-64 overflow-hidden mb-6 relative">
-                                      <img src={trend.image} className="w-full h-full object-cover mix-blend-multiply" />
+                                      <ImageWithSkeleton src={trend.image} className="w-full h-full object-cover mix-blend-multiply" containerClassName="w-full h-full" />
                                       <div className={`absolute bottom-0 right-0 w-12 h-12 ${trend.color} shadow-lg`}></div>
                                   </div>
                                   <h4 className="text-2xl font-serif mb-2">{trend.title}</h4>
@@ -231,7 +233,7 @@ export const Fashion: React.FC = () => {
                                        {String(idx + 1).padStart(2, '0')}
                                    </div>
                                    
-                                   <img src={article.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0" />
+                                   <ImageWithSkeleton src={article.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0" containerClassName="w-full h-full" />
                                    
                                    <div className="absolute bottom-4 left-4">
                                        <span className="bg-luxe-black text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">

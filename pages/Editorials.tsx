@@ -1,85 +1,119 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category } from '../types';
 import { Button } from '../components/ui/Button';
 import { useBlog } from '../context/BlogContext';
+import { ImageWithSkeleton } from '../components/ui/ImageWithSkeleton';
+import { Skeleton } from '../components/ui/Skeleton';
 
 export const Editorials: React.FC = () => {
   const [filter, setFilter] = useState<Category | 'All'>('All');
+  const [isLoading, setIsLoading] = useState(true);
   const { articles } = useBlog();
 
   const filteredArticles = filter === 'All' 
     ? articles 
     : articles.filter(a => a.category === filter);
 
+  // Simulate loading delay for skeleton demo
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [filter]);
+
   return (
     <div className="min-h-screen pt-20 bg-white">
       <div className="bg-luxe-cream py-20 px-6 text-center border-b border-gray-100">
-          <h1 className="text-5xl md:text-7xl font-serif text-luxe-black mb-6">The Journal</h1>
-          <p className="max-w-2xl mx-auto text-slate-600 text-lg leading-relaxed">
+          <h1 className="text-5xl md:text-7xl font-serif text-luxe-black mb-6 animate-fade-in-up">The Journal</h1>
+          <p className="max-w-2xl mx-auto text-slate-600 text-lg leading-relaxed animate-fade-in delay-100">
               In-depth stories, interviews, and reports from the world of high fashion and beauty.
           </p>
       </div>
 
-      {/* Filter Bar */}
-      <div className="sticky top-[80px] z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 py-4 overflow-x-auto">
-          <div className="container mx-auto px-6 flex justify-center gap-2 md:gap-4 min-w-max">
-             <button 
-                onClick={() => setFilter('All')}
-                className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filter === 'All' ? 'bg-luxe-black text-white' : 'bg-transparent text-gray-500 hover:text-black'}`}
-             >
-                All Stories
-             </button>
-             {Object.values(Category).map(cat => (
+      {/* Improved Filter Bar */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 shadow-sm">
+          <div className="container mx-auto px-6 overflow-x-auto no-scrollbar">
+             <div className="flex justify-start md:justify-center gap-3 min-w-max px-2 snap-x">
                  <button 
-                    key={cat}
-                    onClick={() => setFilter(cat)}
-                    className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filter === cat ? 'bg-luxe-black text-white' : 'bg-transparent text-gray-500 hover:text-black'}`}
+                    onClick={() => setFilter('All')}
+                    className={`snap-center px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${filter === 'All' ? 'bg-luxe-black text-white border-luxe-black shadow-md' : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-luxe-black hover:text-black'}`}
                  >
-                    {cat}
+                    All Stories
                  </button>
-             ))}
+                 {Object.values(Category).map(cat => (
+                     <button 
+                        key={cat}
+                        onClick={() => setFilter(cat)}
+                        className={`snap-center px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${filter === cat ? 'bg-luxe-black text-white border-luxe-black shadow-md' : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-luxe-black hover:text-black'}`}
+                     >
+                        {cat}
+                     </button>
+                 ))}
+             </div>
           </div>
       </div>
 
       <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
-              {filteredArticles.map((article) => (
-                  <article key={article.id} className="group cursor-pointer flex flex-col h-full">
-                      <div className="relative overflow-hidden mb-6 aspect-[4/3]">
-                          <img 
-                            src={article.imageUrl} 
-                            alt={article.title} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
-                          <div className="absolute top-4 left-4">
-                              <span className="bg-white text-luxe-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
-                                  {article.category}
-                              </span>
+              {isLoading ? (
+                  // Skeleton Loaders
+                  Array.from({ length: 6 }).map((_, idx) => (
+                      <div key={idx} className="flex flex-col h-full animate-pulse">
+                          <Skeleton className="aspect-[4/3] w-full mb-6 rounded-sm" />
+                          <div className="flex gap-3 mb-3">
+                              <Skeleton className="h-3 w-16" />
+                              <Skeleton className="h-3 w-3 rounded-full" />
+                              <Skeleton className="h-3 w-20" />
                           </div>
+                          <Skeleton className="h-8 w-3/4 mb-4" />
+                          <Skeleton className="h-20 w-full mb-6" />
+                          <Skeleton className="h-4 w-24" />
                       </div>
-                      <div className="flex-1 flex flex-col">
-                          <div className="flex items-center gap-3 text-xs text-gray-400 uppercase tracking-widest mb-3">
-                              <span>{article.date}</span>
-                              <span className="w-1 h-1 bg-luxe-gold rounded-full"></span>
-                              <span>{article.author}</span>
+                  ))
+              ) : (
+                  filteredArticles.map((article) => (
+                      <article key={article.id} className="group cursor-pointer flex flex-col h-full perspective-1000">
+                          <div className="relative overflow-hidden mb-6 aspect-[4/3] rounded-sm bg-gray-100">
+                              <ImageWithSkeleton 
+                                src={article.imageUrl} 
+                                alt={article.title} 
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                containerClassName="w-full h-full"
+                              />
+                              <div className="absolute top-4 left-4">
+                                  <span className="bg-white/90 backdrop-blur-sm text-luxe-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                                      {article.category}
+                                  </span>
+                              </div>
                           </div>
-                          <h2 className="text-2xl font-serif text-luxe-black mb-3 leading-tight group-hover:text-luxe-gold transition-colors">
-                              {article.title}
-                          </h2>
-                          <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-3">
-                              {article.excerpt}
-                          </p>
-                          <div className="mt-auto">
-                             <span className="text-xs font-bold uppercase border-b border-black pb-1 group-hover:text-luxe-gold group-hover:border-luxe-gold transition-colors">Read Article</span>
+                          <div className="flex-1 flex flex-col">
+                              <div className="flex items-center gap-3 text-xs text-gray-400 uppercase tracking-widest mb-3">
+                                  <span>{article.date}</span>
+                                  <span className="w-1 h-1 bg-luxe-gold rounded-full"></span>
+                                  <span>{article.author}</span>
+                              </div>
+                              <h2 className="text-2xl font-serif text-luxe-black mb-3 leading-tight group-hover:text-luxe-gold transition-colors">
+                                  {article.title}
+                              </h2>
+                              <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-3">
+                                  {article.excerpt}
+                              </p>
+                              <div className="mt-auto">
+                                 <span className="text-xs font-bold uppercase border-b border-black pb-1 group-hover:text-luxe-gold group-hover:border-luxe-gold transition-colors">Read Article</span>
+                              </div>
                           </div>
-                      </div>
-                  </article>
-              ))}
+                      </article>
+                  ))
+              )}
           </div>
           
-          <div className="mt-20 text-center">
-              <Button variant="outline">Load More Stories</Button>
-          </div>
+          {!isLoading && (
+            <div className="mt-20 text-center">
+                <Button variant="outline">Load More Stories</Button>
+            </div>
+          )}
       </div>
     </div>
   );

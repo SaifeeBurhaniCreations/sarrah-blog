@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { Link } from 'react-router-dom';
+import { ImageWithSkeleton } from './ui/ImageWithSkeleton';
 
 interface FeaturedProductsProps {
   products: Product[];
@@ -55,10 +56,11 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) 
                     {/* Image Area */}
                     <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-gray-50 mb-6">
                         <Link to={`/products/${product.id}`}>
-                            <img 
+                            <ImageWithSkeleton 
                                 src={product.imageUrl} 
                                 alt={product.name}
                                 className="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-110 cursor-pointer"
+                                containerClassName="w-full h-full"
                             />
                         </Link>
                         {/* Hover Overlay */}

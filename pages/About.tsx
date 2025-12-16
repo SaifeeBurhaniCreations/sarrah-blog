@@ -11,7 +11,7 @@ export const About: React.FC = () => {
          
          <div className="relative z-20 text-center px-6 animate-fade-in-up">
              <span className="text-xs font-bold uppercase tracking-[0.3em] text-luxe-gold mb-4 block">Est. 2024</span>
-             <h1 className="text-5xl md:text-7xl font-serif text-luxe-black mb-6">Burhani Creations</h1>
+             <h1 className="text-5xl md:text-7xl font-serif text-luxe-black mb-6">Burhani Creates</h1>
              <p className="max-w-2xl mx-auto text-slate-600 text-xl font-serif italic">
                 Where editorial depth meets digital sophistication.
              </p>
@@ -27,7 +27,7 @@ export const About: React.FC = () => {
                       In an era of fleeting trends, we stand for permanence. We believe that true luxury is not about price, but about the story, the craft, and the feeling it evokes. 
                   </p>
                   <p className="text-slate-600 leading-relaxed">
-                      Burhani Creations serves as a sanctuary for the aesthete—a curated space where fashion, beauty, and culture intersect. From the ateliers of Paris to the streets of Tokyo, we bring you the narratives that shape our visual world.
+                      Burhani Creates serves as a sanctuary for the aesthete—a curated space where fashion, beauty, and culture intersect. From the ateliers of Paris to the streets of Tokyo, we bring you the narratives that shape our visual world.
                   </p>
               </div>
               <div className="grid grid-cols-2 gap-4">

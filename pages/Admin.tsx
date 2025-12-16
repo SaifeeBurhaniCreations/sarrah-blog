@@ -240,9 +240,9 @@ export const Admin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
-      <div className="container mx-auto px-6 max-w-6xl">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50 pt-24 pb-12 overflow-x-hidden">
+      <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 className="text-3xl font-serif text-luxe-black">Burhani <span className="text-luxe-gold">Editor</span></h1>
                 <p className="text-slate-500 text-sm">Manage content and curate the platform.</p>
@@ -250,15 +250,15 @@ export const Admin: React.FC = () => {
             <div className="flex gap-4">
                 <button 
                     onClick={() => setActiveTab('dashboard')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'dashboard' ? 'bg-luxe-black text-white' : 'bg-white text-slate-600 hover:bg-gray-100'}`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm md:text-base ${activeTab === 'dashboard' ? 'bg-luxe-black text-white' : 'bg-white text-slate-600 hover:bg-gray-100'}`}
                 >
-                    <Layout size={18} /> Dashboard
+                    <Layout size={16} /> Dashboard
                 </button>
                 <button 
                     onClick={() => setActiveTab('create')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'create' ? 'bg-luxe-black text-white' : 'bg-white text-slate-600 hover:bg-gray-100'}`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm md:text-base ${activeTab === 'create' ? 'bg-luxe-black text-white' : 'bg-white text-slate-600 hover:bg-gray-100'}`}
                 >
-                    <PenTool size={18} /> New Article
+                    <PenTool size={16} /> New Article
                 </button>
             </div>
         </div>
@@ -305,19 +305,19 @@ export const Admin: React.FC = () => {
         )}
 
         {activeTab === 'create' && (
-            <div className="bg-white p-8 md:p-12 shadow-sm border border-gray-100 rounded-lg max-w-4xl mx-auto animate-fade-in relative">
+            <div className="bg-white p-4 md:p-12 shadow-sm border border-gray-100 rounded-lg max-w-4xl mx-auto animate-fade-in relative">
                 
                 {/* Draft Notification / Loader */}
                 {hasDraft && (
-                    <div className="absolute top-8 right-12 flex items-center gap-2">
-                        <span className="text-xs text-slate-400 italic">Draft available</span>
+                    <div className="absolute top-4 right-4 md:top-8 md:right-12 flex items-center gap-2">
+                        <span className="text-xs text-slate-400 italic hidden md:inline">Draft available</span>
                         <Button variant="outline" onClick={handleLoadDraft} className="py-1 px-3 text-xs h-auto">
                             <FileText size={14} className="mr-1" /> Load Draft
                         </Button>
                     </div>
                 )}
 
-                <h2 className="text-2xl font-serif mb-8 text-center">Compose New Story</h2>
+                <h2 className="text-2xl font-serif mb-8 text-center mt-6 md:mt-0">Compose New Story</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                     
@@ -377,7 +377,7 @@ export const Admin: React.FC = () => {
 
                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-luxe-gold transition-colors relative bg-gray-50/50">
                             {watchedImageUrl ? (
-                                <div className="relative w-full h-64 group">
+                                <div className="relative w-full h-48 md:h-64 group">
                                     <img src={watchedImageUrl} alt="Preview" className="w-full h-full object-cover rounded-md" />
                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
                                         <label htmlFor="file-upload" className="cursor-pointer bg-white text-luxe-black px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-luxe-gold transition-colors">
@@ -427,7 +427,7 @@ export const Admin: React.FC = () => {
                     </div>
 
                     {/* Rich Text Content Editor */}
-                    <div>
+                    <div className="min-w-0">
                         <label className="block text-xs uppercase font-bold text-slate-500 tracking-widest mb-2">Full Story</label>
                         <Controller 
                             name="content"
@@ -443,16 +443,16 @@ export const Admin: React.FC = () => {
                         {errors.content && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.content.message}</p>}
                     </div>
 
-                    <div className="flex justify-between pt-6 border-t border-gray-100">
-                        <Button type="button" variant="outline" onClick={handleSaveDraft} className="border-gray-300 text-gray-500 hover:text-luxe-black hover:border-luxe-black">
+                    <div className="flex flex-col-reverse md:flex-row justify-between pt-6 border-t border-gray-100 gap-4">
+                        <Button type="button" variant="outline" onClick={handleSaveDraft} className="border-gray-300 text-gray-500 hover:text-luxe-black hover:border-luxe-black w-full md:w-auto justify-center">
                             <Save size={18} className="mr-2" /> Save Draft
                         </Button>
 
-                        <div className="flex gap-4">
-                            <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="w-full md:w-auto justify-center">
                                 <Eye size={18} className="mr-2" /> Preview
                             </Button>
-                            <Button type="submit" variant="primary" disabled={isSubmitting}>
+                            <Button type="submit" variant="primary" disabled={isSubmitting} className="w-full md:w-auto justify-center">
                                 {isSubmitting ? 'Publishing...' : 'Publish Editorial'}
                             </Button>
                         </div>
@@ -464,19 +464,19 @@ export const Admin: React.FC = () => {
 
       {/* Full Screen Preview Modal */}
       {showPreview && (
-          <div className="fixed inset-0 z-[100] bg-white overflow-y-auto animate-fade-in">
-              <div className="fixed top-6 right-6 z-[110]">
+          <div className="fixed inset-0 z-[100] bg-white overflow-y-auto animate-fade-in overflow-x-hidden">
+              <div className="fixed top-4 right-4 md:top-6 md:right-6 z-[110]">
                   <button 
                       onClick={() => setShowPreview(false)}
-                      className="bg-black text-white px-6 py-3 rounded-full shadow-xl hover:bg-luxe-gold transition-colors flex items-center gap-2 font-bold uppercase text-xs tracking-widest"
+                      className="bg-black text-white px-4 py-2 md:px-6 md:py-3 rounded-full shadow-xl hover:bg-luxe-gold transition-colors flex items-center gap-2 font-bold uppercase text-[10px] md:text-xs tracking-widest"
                   >
-                      <X size={18} /> Close Preview
+                      <X size={16} /> Close Preview
                   </button>
               </div>
               
-              <div className="min-h-screen bg-white relative">
-                 {/* Hero Image - Fix: Use absolute positioning instead of fixed to avoid z-index stacking issues in modal */}
-                 <div className="h-[60vh] md:h-[80vh] w-full relative overflow-hidden">
+              <div className="min-h-screen bg-white relative w-full">
+                 {/* Hero Image */}
+                 <div className="h-[50vh] md:h-[80vh] w-full relative overflow-hidden">
                      {watchedValues.imageUrl ? (
                           <img src={watchedValues.imageUrl} className="w-full h-full object-cover absolute top-0 left-0" style={{ zIndex: 0 }} />
                      ) : (
@@ -489,12 +489,12 @@ export const Admin: React.FC = () => {
                               <div className="mb-4">
                                   <span className="bg-luxe-gold text-luxe-black px-3 py-1 text-xs font-bold uppercase tracking-widest">{watchedValues.category}</span>
                               </div>
-                              <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif text-white leading-tight mb-6 max-w-4xl drop-shadow-lg">
+                              <h1 className="text-3xl md:text-6xl lg:text-7xl font-serif text-white leading-tight mb-4 md:mb-6 max-w-4xl drop-shadow-lg break-words">
                                   {watchedValues.title || "Untitled Article"}
                               </h1>
-                              <div className="flex items-center gap-6 text-white/80 text-sm font-sans tracking-wide">
+                              <div className="flex flex-wrap items-center gap-4 md:gap-6 text-white/80 text-xs md:text-sm font-sans tracking-wide">
                                   <span>By {watchedValues.author}</span>
-                                  <span className="w-1 h-1 bg-white rounded-full"></span>
+                                  <span className="hidden md:block w-1 h-1 bg-white rounded-full"></span>
                                   <span>{new Date().toLocaleDateString()}</span>
                               </div>
                          </div>
@@ -502,14 +502,14 @@ export const Admin: React.FC = () => {
                  </div>
 
                  {/* Content Body */}
-                 <div className="relative bg-white pt-16 pb-24 px-6 md:px-0 -mt-10 rounded-t-[3rem] z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+                 <div className="relative bg-white pt-12 pb-24 px-4 md:px-0 -mt-6 md:-mt-10 rounded-t-2xl md:rounded-t-[3rem] z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
                      <div className="container mx-auto max-w-3xl">
-                          <p className="text-2xl font-serif italic text-slate-700 leading-relaxed mb-10 border-l-4 border-luxe-gold pl-6">
+                          <p className="text-xl md:text-2xl font-serif italic text-slate-700 leading-relaxed mb-8 md:mb-10 border-l-4 border-luxe-gold pl-4 md:pl-6 break-words">
                               {watchedValues.excerpt || "No excerpt provided."}
                           </p>
 
                           <div 
-                            className="prose prose-lg prose-slate font-serif max-w-none first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left first-letter:text-luxe-black whitespace-pre-wrap"
+                            className="prose prose-sm md:prose-lg prose-slate font-serif max-w-none first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left first-letter:text-luxe-black whitespace-pre-wrap break-words overflow-hidden"
                             dangerouslySetInnerHTML={{ __html: watchedValues.content }}
                           >
                           </div>

@@ -25,7 +25,7 @@ export const Terms: React.FC = () => {
                     Acceptance of Terms
                  </h3>
                  <p className="text-slate-600 leading-relaxed text-lg border-l-2 border-luxe-gold pl-6 py-1">
-                    By accessing and using Burhani Creations, you agree to comply with and be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.
+                    By accessing and using Burhani Creates, you agree to comply with and be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.
                  </p>
              </div>
           </section>
@@ -39,7 +39,7 @@ export const Terms: React.FC = () => {
                     Intellectual Property
                  </h3>
                  <p className="text-slate-600 leading-relaxed mb-6">
-                    All content published and made available on our site is the property of Burhani Creations and the site's creators. This includes, but is not limited to:
+                    All content published and made available on our site is the property of Burhani Creates and the site's creators. This includes, but is not limited to:
                  </p>
                  <div className="grid grid-cols-2 gap-4">
                     {['Images & Photography', 'Editorial Content', 'Logos & Branding', 'Downloadable Files'].map((item, i) => (
@@ -90,7 +90,7 @@ export const Terms: React.FC = () => {
              <div className="relative">
                  <h3 className="text-2xl font-serif text-luxe-black mb-6">Limitation of Liability</h3>
                  <p className="text-slate-600 leading-relaxed">
-                    Burhani Creations and our directors, officers, agents, employees, subsidiaries, and affiliates will not be liable for any actions, claims, losses, damages, liabilities and expenses including legal fees from your use of the site.
+                    Burhani Creates and our directors, officers, agents, employees, subsidiaries, and affiliates will not be liable for any actions, claims, losses, damages, liabilities and expenses including legal fees from your use of the site.
                  </p>
              </div>
           </section>

@@ -25,7 +25,7 @@ export const Logo: React.FC<LogoProps> = ({ variant = 'full', className = '' }) 
         <span className={`text-4xl leading-none ${accentColor}`}>.</span>
       </h1>
       <span className={`text-[8px] md:text-[10px] uppercase tracking-[0.4em] font-sans font-semibold ${isLight ? 'text-gray-400' : 'text-slate-500'} ml-1`}>
-        Creations
+        Creates
       </span>
     </div>
   );
