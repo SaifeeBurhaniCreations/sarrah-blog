@@ -29,6 +29,18 @@ export const Navbar: React.FC = () => {
     return true;
   });
 
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
+
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
@@ -36,15 +48,15 @@ export const Navbar: React.FC = () => {
         ? 'bg-white/90 backdrop-blur-xl py-3 shadow-sm border-b border-luxe-gold/20' 
         : 'bg-transparent py-6 border-b border-transparent'}`}
     >
-      <div className="container mx-auto px-6 flex items-center justify-between">
+      <div className="container mx-auto px-6 flex items-center justify-between relative z-50">
         
         {/* Mobile Menu Button */}
-        <button className="md:hidden text-luxe-black hover:text-luxe-gold transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <button className="md:hidden text-luxe-black hover:text-luxe-gold transition-colors z-50" onClick={() => setIsMenuOpen(!isMenuOpen)}>
            {isMenuOpen ? <X size={28} strokeWidth={1.5} /> : <Menu size={28} strokeWidth={1.5} />}
         </button>
 
         {/* Logo */}
-        <Link to="/" className="group relative z-50">
+        <Link to="/" className="group relative z-50" onClick={() => setIsMenuOpen(false)}>
            <Logo />
         </Link>
 
@@ -64,10 +76,8 @@ export const Navbar: React.FC = () => {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center space-x-6 text-luxe-black">
-          {/* {!isAuthenticated && (
-             <Link to="/" className="hover:text-luxe-gold transition-colors hidden md:block"> */}
-                {!isAuthenticated && location.pathname !== '/login' && (
+        <div className="flex items-center space-x-6 text-luxe-black z-50">
+          {!isAuthenticated && location.pathname !== '/login' && (
              <Link to="/login" className="hover:text-luxe-gold transition-colors hidden md:block">
                 <User size={22} strokeWidth={1.5} />
              </Link>
@@ -93,30 +103,28 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Nav Overlay */}
-      <div className={`fixed inset-0 bg-white/95 backdrop-blur-3xl z-40 flex flex-col items-center justify-center space-y-8 transition-transform duration-700 cubic-bezier(0.77, 0, 0.175, 1) md:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className={`fixed inset-0 bg-white/98 backdrop-blur-3xl z-40 flex flex-col items-center justify-center transition-transform duration-500 cubic-bezier(0.77, 0, 0.175, 1) md:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
          {/* Decorative circle in mobile menu */}
-         <div className="absolute top-20 right-20 w-64 h-64 bg-luxe-rose/20 rounded-full blur-3xl"></div>
+         <div className="absolute top-20 right-20 w-64 h-64 bg-luxe-rose/20 rounded-full blur-3xl pointer-events-none"></div>
          
-         <Link to="/" onClick={() => setIsMenuOpen(false)} className="mb-8">
-            <Logo />
-         </Link>
-
-         {visibleNavItems.map((item) => (
-            <Link 
-              key={item.path} 
-              to={item.path}
-              onClick={() => setIsMenuOpen(false)}
-              className="text-4xl font-serif text-luxe-black hover:text-luxe-gold transition-colors relative group"
-            >
-              {item.label}
-              <span className="absolute -bottom-2 left-0 w-0 h-1 bg-luxe-gold transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-          ))}
-          {!isAuthenticated && (
-              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="text-xl uppercase tracking-widest font-bold text-slate-500 mt-8">
-                  Login
-              </Link>
-          )}
+         <div className="flex flex-col items-center space-y-6 w-full px-6 max-h-[80vh] overflow-y-auto">
+             {visibleNavItems.map((item) => (
+                <Link 
+                  key={item.path} 
+                  to={item.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-3xl font-serif text-luxe-black hover:text-luxe-gold transition-colors relative group text-center w-full py-2"
+                >
+                  {item.label}
+                  <span className="block mx-auto h-[1px] bg-luxe-gold transition-all duration-300 w-0 group-hover:w-16 mt-2"></span>
+                </Link>
+              ))}
+              {!isAuthenticated && (
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="text-sm uppercase tracking-widest font-bold text-slate-500 mt-8 hover:text-luxe-black transition-colors">
+                      Login
+                  </Link>
+              )}
+         </div>
       </div>
     </header>
   );

@@ -87,7 +87,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
           e.stopPropagation();
           const component = removeBtn.closest('.removable-component');
           if (component) {
-              component.remove();
+              // Use native selection and delete command to support Undo
+              const selection = window.getSelection();
+              const range = document.createRange();
+              range.selectNode(component);
+              if (selection) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('delete');
+              } else {
+                 // Fallback
+                 component.remove();
+              }
+              
               handleInput();
               addToast('Element removed', 'success');
           }
@@ -126,8 +138,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   // --- Image & Gallery Handling ---
 
   const triggerImageUpload = (type: 'image' | 'gallery' | 'polaroid' | 'image-carousel') => {
-      const willBeMultiple = type === 'gallery' || type === 'image-carousel' || type === 'polaroid';
-
       setInsertType(type);
       setTimeout(() => {
           if (fileInputRef.current) {
@@ -136,28 +146,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
           }
       }, 0);
   };
-const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const fileList = e.target.files;
-  if (!fileList || fileList.length === 0) return;
-  try {
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
 
       contentRef.current?.focus(); 
 
-  const filesArray = Array.from(fileList) as File[];
-
-  contentRef.current?.focus();
-
-    const uploadsRaw = await Promise.all(
-      filesArray.map((file: File) => FileUploadService.uploadImage(file))
-    );
-
-    // Normalize uploads to string[] (handle cases where upload returns { url } or string)
-    const uploads: string[] = uploadsRaw.map((u) =>
-      typeof u === 'string' ? u : (u && (u as any).url) ? (u as any).url : String(u)
-    );
-
-    // debug quickly if needed
-    // console.log('uploads:', uploads);
+      try {
+        const uploads = await Promise.all(
+            Array.from(files).map(file => FileUploadService.uploadImage(file))
+        );
 
         let htmlToInsert = '';
         
@@ -228,11 +227,11 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       } catch (error) {
           console.error("Editor upload failed", error);
           addToast("Failed to upload image(s)", "error");
-            } finally {
+      } finally {
           setInsertType(null);
           if (fileInputRef.current) fileInputRef.current.value = '';
       }
-    }; 
+  };
 
   // --- Product Carousel Logic ---
 
@@ -271,7 +270,7 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
       const itemsHtml = productItems.map(item => `
         <div class="min-w-[280px] max-w-[300px] snap-center group/card perspective-1000 pl-4 h-full flex flex-col">
-             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100 flex-1 flex flex-col">
+             <div class="relative bg-white rounded-2xl p-4 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 transform hover:-translate-y-4 hover:rotate-1 hover:shadow-[0_20px_50px_-10px_rgba(212,175,55,0.2)] border border-gray-100 flex-1 flex flex-col max-h-[500px]">
                  
                  <div class="absolute top-4 left-4 z-[30] bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-sm shadow-sm border border-gray-100">
                      <span class="text-[10px] font-bold uppercase tracking-widest text-luxe-black whitespace-nowrap">Editor's Pick</span>
@@ -290,12 +289,12 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                  <div class="text-center px-2 flex-grow flex flex-col justify-end">
                      <h4 class="font-serif text-lg text-luxe-black mb-1 truncate w-full hover:text-luxe-gold transition-colors" title="${item.title}">${item.title}</h4>
                      
-                     <div class="flex justify-center gap-1 my-2">
-                        <span class="text-amber-400 text-xs">★</span>
-                        <span class="text-amber-400 text-xs">★</span>
-                        <span class="text-amber-400 text-xs">★</span>
-                        <span class="text-amber-400 text-xs">★</span>
-                        <span class="text-amber-400 text-xs">★</span>
+                     <div class="flex justify-center gap-1 my-2" title="Rating: 5 Stars">
+                        <span class="text-amber-400 text-sm">★</span>
+                        <span class="text-amber-400 text-sm">★</span>
+                        <span class="text-amber-400 text-sm">★</span>
+                        <span class="text-amber-400 text-sm">★</span>
+                        <span class="text-amber-400 text-sm">★</span>
                      </div>
 
                      <p class="font-bold text-lg text-luxe-charcoal">$${item.price}</p>
@@ -351,8 +350,6 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     </button>
   );
 
-  const isMultiple = insertType === 'gallery' || insertType === 'image-carousel' || insertType === 'polaroid';
-
   return (
     <div className="border border-gray-200 rounded-lg bg-white focus-within:border-luxe-gold focus-within:ring-1 focus-within:ring-luxe-gold transition-all shadow-sm relative z-0">
       
@@ -385,12 +382,11 @@ const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
         {/* Hidden File Input for basic images */}
         <input 
-            key={String(isMultiple)} 
             type="file" 
             ref={fileInputRef} 
             className="hidden" 
             accept="image/*" 
-            multiple={isMultiple}
+            multiple={insertType === 'gallery' || insertType === 'image-carousel'}
             onChange={handleFileUpload}
         />
       </div>

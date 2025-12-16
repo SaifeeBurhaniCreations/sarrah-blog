@@ -311,7 +311,7 @@ export const Admin: React.FC = () => {
                 {hasDraft && (
                     <div className="absolute top-8 right-12 flex items-center gap-2">
                         <span className="text-xs text-slate-400 italic">Draft available</span>
-                        <Button variant="outline" onClick={handleLoadDraft} className="flex py-1 px-3 text-xs h-auto">
+                        <Button variant="outline" onClick={handleLoadDraft} className="py-1 px-3 text-xs h-auto">
                             <FileText size={14} className="mr-1" /> Load Draft
                         </Button>
                     </div>
@@ -444,12 +444,12 @@ export const Admin: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between pt-6 border-t border-gray-100">
-                        <Button type="button" variant="outline" onClick={handleSaveDraft} className="flex border-gray-300 text-gray-500 hover:text-luxe-black hover:border-luxe-black">
+                        <Button type="button" variant="outline" onClick={handleSaveDraft} className="border-gray-300 text-gray-500 hover:text-luxe-black hover:border-luxe-black">
                             <Save size={18} className="mr-2" /> Save Draft
                         </Button>
 
                         <div className="flex gap-4">
-                            <Button type="button" className="flex" variant="outline" onClick={() => setShowPreview(true)}>
+                            <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>
                                 <Eye size={18} className="mr-2" /> Preview
                             </Button>
                             <Button type="submit" variant="primary" disabled={isSubmitting}>
